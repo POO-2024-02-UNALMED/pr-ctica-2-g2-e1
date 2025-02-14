@@ -1,39 +1,40 @@
-from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
+# src/UDManager/gestorAplicacion/reservas/reserva.py
+
+import random
+from datetime import datetime
 
 class Reserva:
     listaReservas = []
 
-    def __init__(self, cliente=None, instalacion=None, fechaReserva=None, aPagar=0,
-                 equipo1=None, equipo2=None, grupoFormativo=None, arbitro=None, horaReservada=None):
-        self.id = len(Reserva.listaReservas) + 1
+    def __init__(self, cliente, instalacion, fechaReserva, aPagar):
+        self.ID = len(Reserva.listaReservas) + 1
         self.cliente = cliente
         self.instalacion = instalacion
         self.fechaReserva = fechaReserva
         self.aPagar = aPagar
         self.pagada = False
-        self.equipo1 = equipo1
-        self.equipo2 = equipo2
-        self.grupoFormativo = grupoFormativo
-        self.arbitro = arbitro
+        self.equipo1 = None
+        self.equipo2 = None
+        self.grupoFormativo = None
+        self.arbitro = None
         Reserva.listaReservas.append(self)
+        instalacion.agregar_reserva(self)
 
-    @classmethod
-    def buscarReserva(cls, id):
-        for reserva in cls.listaReservas:
-            if reserva.id == id:
-                return reserva
+    @staticmethod
+    def buscarReserva(ID):
+        for r in Reserva.listaReservas:
+            if r.ID == ID:
+                return r
         return None
 
-    def setPagada(self):
-        self.pagada = True
+    @staticmethod
+    def getListaReservas():
+        return Reserva.listaReservas
+
+    @staticmethod
+    def setListaReservas(lista):
+        Reserva.listaReservas = lista
 
     def __str__(self):
-        if self.cliente and self.instalacion:
-            descuento = (self.cliente.suscripcion.tipoSuscripcion.descuento
-                         if (self.cliente and self.cliente.suscripcion) else 0)
-            totalConDesc = self.aPagar - self.aPagar * descuento
-            return (f"Reserva:\nID: {self.id}\nCliente: {self.cliente.nombre} {self.cliente.apellido}\n"
-                    f"Instalación: {self.instalacion.nombre}\nTotal básico: {self.aPagar}\n"
-                    f"Total con descuento: {totalConDesc}\nPagada: {self.pagada}")
-        else:
-            return f"Reserva ID: {self.id}"
+        return (f"Reserva {self.ID} para {self.cliente.getNombreCompleto()} en {self.instalacion.nombre}. "
+                f"Total a pagar: {self.aPagar} - Pagada: {self.pagada}")

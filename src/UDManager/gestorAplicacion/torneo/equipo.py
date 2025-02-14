@@ -1,14 +1,13 @@
-class Equipo:
-    counter = 0
+# src/UDManager/gestorAplicacion/torneo/equipo.py
 
-    def __init__(self, nombreEquipo=""):
-        Equipo.counter += 1
-        self.idEquipo = Equipo.counter
+class Equipo:
+    def __init__(self, nombreEquipo):
+        self.idEquipo = 0
         self.nombreEquipo = nombreEquipo
         self.jugadores = []
 
-    def agregarJugador(self, nombreJugador):
+    def setJugador(self, nombreJugador):
         self.jugadores.append(nombreJugador)
 
     def __str__(self):
-        return f"Equipo: {self.nombreEquipo} (ID: {self.idEquipo})"
+        return f"Equipo: {self.nombreEquipo} - Jugadores: {', '.join(self.jugadores)}"

@@ -1,6 +1,7 @@
+# src/UDManager/uiMain/app.py
+
 import tkinter as tk
 from tkinter import messagebox
-from src.UDManager.uiMain.dataManager import DataManager
 from src.UDManager.gestorAplicacion.eventos.evento import Evento
 from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
@@ -9,320 +10,243 @@ from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
 from src.UDManager.gestorAplicacion.pagos.boleta import Boleta
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
 from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
-from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
 
 tiendaEscuela = TiendaEscuela()
 Instalacion.crearInstalaciones()
 
-
 class Application(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Sistema de Gestión")
-        self.geometry("900x700")
+        self.title("Complejo Deportivo")
+        self.geometry("1100x750")
+        self.resizable(False, False)
 
-        # Menú de Archivo
+        # Cargar base de datos (se implementa con pickle en BaseDatos)
+        from src.UDManager.baseDatos.deserializador import Deserializador
+        Deserializador.deserializar()
+
+        # Se asumen listas globales; en una implementación real se cargarían desde BD
+        self.clientes = Cliente.getListaClientes()
+        self.instalaciones = Instalacion.listaInstalaciones
+        self.torneos = Torneo.getTorneos()
+        self.eventos = Evento.getEventos()
+        self.pagos = Boleta.listaBoletas  # O la lista de pagos que uses
+        # Se asignan demás listas según la estructura de BD
+        self.arbitros = []
+        self.medicos = []
+        self.paramedicos = []
+        self.foodtrucks = []
+        self.formativos = []
+        self.suscripciones = []
+
+        # Zona 0: Título y descripción
+        title_frame = tk.Frame(self, bd=2, relief="ridge", bg="#ecf0f1")
+        title_frame.pack(fill="x")
+        title_label = tk.Label(title_frame, text="Complejo Deportivo", font=("Arial", 24, "bold"), bg="#ecf0f1", fg="#2c3e50")
+        title_label.pack(side="left", padx=10, pady=5)
+        desc_label = tk.Label(title_frame, text="Utilice el menú para gestionar las funcionalidades del sistema", font=("Arial", 12), bg="#ecf0f1", fg="#2c3e50")
+        desc_label.pack(side="left", padx=10, pady=5)
+
+        # Zona 1: Menú superior
         menubar = tk.Menu(self)
         fileMenu = tk.Menu(menubar, tearoff=0)
-        fileMenu.add_command(label="Guardar", command=DataManager.saveData)
-        fileMenu.add_command(label="Cargar", command=DataManager.loadData)
+        fileMenu.add_command(label="Guardar", command=self.save_db)
+        fileMenu.add_command(label="Cargar", command=lambda: messagebox.showinfo("BD", "Funcionalidad de carga implementada en inicio.py"))
         fileMenu.add_separator()
         fileMenu.add_command(label="Salir", command=self.quit)
         menubar.add_cascade(label="Archivo", menu=fileMenu)
         self.config(menu=menubar)
 
-        # Frame de navegación
-        navFrame = tk.Frame(self)
-        navFrame.pack(side=tk.TOP, fill=tk.X)
+        # Zona 2: Navegación y contenido
+        self.tab_buttons_frame = tk.Frame(self, bd=2, relief="raised")
+        self.tab_buttons_frame.pack(fill="x")
+        self.tabs = {}
+        self.create_tab_buttons()
 
-        buttons = [
-            ("Eventos", self.showEventos),
-            ("Jóvenes", self.showJovenes),
-            ("Tienda", self.showTienda),
-            ("Reservas", self.showReservas),
-            ("Instalaciones", self.showInstalaciones),
-            ("Torneos", self.showTorneos),
-            ("Clientes", self.showClientes),
-            ("Boletas", self.showBoletas)
-        ]
-        for (text, command) in buttons:
-            btn = tk.Button(navFrame, text=text, command=command)
-            btn.pack(side=tk.LEFT, padx=2, pady=2)
+        self.content_frame = tk.Frame(self)
+        self.content_frame.pack(fill="both", expand=True)
 
-        # Contenedor para los frames
-        self.container = tk.Frame(self)
-        self.container.pack(fill=tk.BOTH, expand=True)
+        self.tabs["Clientes"] = self.create_clientes_tab()
+        self.tabs["Instalaciones"] = self.create_instalaciones_tab()
+        self.tabs["Reservas"] = self.create_reservas_tab()
+        self.tabs["Torneos"] = self.create_torneos_tab()
+        self.tabs["Eventos"] = self.create_eventos_tab()
+        self.tabs["Pagos"] = self.create_pagos_tab()
+        self.tabs["Formativo"] = self.create_formativo_tab()
 
-        self.frames = {}
-        self.frames["eventos"] = self.createEventosFrame(self.container)
-        self.frames["jovenes"] = self.createJovenesFrame(self.container)
-        self.frames["tienda"] = self.createTiendaFrame(self.container)
-        self.frames["reservas"] = self.createReservasFrame(self.container)
-        self.frames["instalaciones"] = self.createInstalacionesFrame(self.container)
-        self.frames["torneos"] = self.createTorneosFrame(self.container)
-        self.frames["clientes"] = self.createClientesFrame(self.container)
-        self.frames["boletas"] = self.createBoletasFrame(self.container)
+        self.show_tab("Clientes")
 
-        self.currentFrame = None
-        self.showFrame("eventos")
+    def create_tab_buttons(self):
+        botones = ["Clientes", "Instalaciones", "Reservas", "Torneos", "Eventos", "Pagos", "Formativo"]
+        for b in botones:
+            btn = tk.Button(self.tab_buttons_frame, text=b, command=lambda name=b: self.show_tab(name))
+            btn.pack(side="left", padx=2, pady=2)
 
-    def showFrame(self, name):
-        if self.currentFrame:
-            self.currentFrame.pack_forget()
-        frame = self.frames[name]
-        frame.pack(fill=tk.BOTH, expand=True)
-        self.currentFrame = frame
+    def show_tab(self, tab_name):
+        for frame in self.content_frame.winfo_children():
+            frame.pack_forget()
+        self.tabs[tab_name].pack(fill="both", expand=True)
 
-    def showEventos(self):
-        self.showFrame("eventos")
+    def save_db(self):
+        from src.UDManager.baseDatos.serializador import Serializador
+        Serializador.serializar()
+        messagebox.showinfo("BD", "Base de datos guardada correctamente.")
 
-    def showJovenes(self):
-        self.showFrame("jovenes")
-
-    def showTienda(self):
-        self.showFrame("tienda")
-
-    def showReservas(self):
-        self.showFrame("reservas")
-
-    def showInstalaciones(self):
-        self.showFrame("instalaciones")
-
-    def showTorneos(self):
-        self.showFrame("torneos")
-
-    def showClientes(self):
-        self.showFrame("clientes")
-
-    def showBoletas(self):
-        self.showFrame("boletas")
-
-    def createEventosFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.eventosListbox = tk.Listbox(frame, width=100)
-        self.eventosListbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Agregar Evento", command=self.addEvento).pack(pady=5)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshEventos).pack(pady=5)
+    def create_clientes_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Gestión de Clientes", font=("Arial", 18))
+        lbl.pack(pady=10)
+        btn_crear = tk.Button(frame, text="Crear Cliente (sin suscripción)", command=self.crear_cliente)
+        btn_crear.pack(pady=10)
+        btn_ver = tk.Button(frame, text="Ver Clientes", command=self.ver_clientes)
+        btn_ver.pack(pady=10)
         return frame
 
-    def refreshEventos(self):
-        self.eventosListbox.delete(0, tk.END)
-        for evento in Evento.eventos:
-            self.eventosListbox.insert(tk.END, str(evento))
+    def crear_cliente(self):
+        # Se implementa la creación de clientes mediante un diálogo
+        pass  # Se agrega la lógica real según el proyecto
 
-    def addEvento(self):
-        win = tk.Toplevel(self)
-        win.title("Agregar Evento")
-        labels = ["Nombre Evento", "Tipo Evento", "Personaje Principal", "Género Musical"]
-        entries = {}
-        for i, label in enumerate(labels):
-            tk.Label(win, text=label+":").grid(row=i, column=0)
-            entry = tk.Entry(win)
-            entry.grid(row=i, column=1)
-            entries[label] = entry
+    def ver_clientes(self):
+        # Se implementa la visualización de clientes
+        pass
 
-        def saveEvento():
-            evento = Evento()
-            evento.nombreEvento = entries["Nombre Evento"].get()
-            evento.tipoEvento = entries["Tipo Evento"].get()
-            evento.personajePrincipal = entries["Personaje Principal"].get()
-            evento.generoMusical = entries["Género Musical"].get()
-            Evento.eventos.append(evento)
-            self.refreshEventos()
-            win.destroy()
-
-        tk.Button(win, text="Guardar", command=saveEvento).grid(row=len(labels), column=0, columnspan=2)
-
-    def createJovenesFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.jovenesListbox = tk.Listbox(frame, width=100)
-        self.jovenesListbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Agregar Joven", command=self.addJoven).pack(pady=5)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshJovenes).pack(pady=5)
+    def create_instalaciones_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Instalaciones", font=("Arial", 18))
+        lbl.pack(pady=10)
+        btn_ver = tk.Button(frame, text="Ver Instalaciones", command=self.ver_instalaciones)
+        btn_ver.pack(pady=10)
         return frame
 
-    def refreshJovenes(self):
-        self.jovenesListbox.delete(0, tk.END)
-        for joven in Joven.listaJovenes:
-            self.jovenesListbox.insert(tk.END, str(joven))
+    def ver_instalaciones(self):
+        # Lógica para ver instalaciones
+        pass
 
-    def addJoven(self):
-        win = tk.Toplevel(self)
-        win.title("Agregar Joven")
-        labels = ["Nombre", "Apellido", "Edad", "Experiencia", "EPS", "Nombre Acudiente", "Teléfono Acudiente", "Cédula Acudiente"]
-        entries = {}
-        for i, label in enumerate(labels):
-            tk.Label(win, text=label+":").grid(row=i, column=0)
-            entry = tk.Entry(win)
-            entry.grid(row=i, column=1)
-            entries[label] = entry
-
-        def saveJoven():
-            try:
-                Joven(
-                    nombre=entries["Nombre"].get(),
-                    apellido=entries["Apellido"].get(),
-                    edad=int(entries["Edad"].get()),
-                    experienciaJoven=int(entries["Experiencia"].get()),
-                    eps=entries["EPS"].get(),
-                    nombreAcudiente=entries["Nombre Acudiente"].get(),
-                    telefonoAcudiente=entries["Teléfono Acudiente"].get(),
-                    cedulaAcudiente=entries["Cédula Acudiente"].get()
-                )
-                self.refreshJovenes()
-                win.destroy()
-            except Exception as e:
-                messagebox.showerror("Error", f"Error: {e}")
-
-        tk.Button(win, text="Guardar", command=saveJoven).grid(row=len(labels), column=0, columnspan=2)
-
-    def createTiendaFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.tiendaListbox = tk.Listbox(frame, width=100)
-        self.tiendaListbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Agregar Artículo", command=self.addArticulo).pack(pady=5)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshTienda).pack(pady=5)
+    def create_reservas_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Reservas", font=("Arial", 18))
+        lbl.pack(pady=10)
+        btn_crear = tk.Button(frame, text="Crear Reserva", command=self.crear_reserva)
+        btn_crear.pack(pady=10)
+        btn_ver = tk.Button(frame, text="Ver Reservas", command=self.ver_reservas)
+        btn_ver.pack(pady=10)
         return frame
 
-    def refreshTienda(self):
-        self.tiendaListbox.delete(0, tk.END)
-        for art in tiendaEscuela.listarArticulos():
-            self.tiendaListbox.insert(tk.END, str(art))
+    def crear_reserva(self):
+        # Lógica para crear reserva
+        pass
 
-    def addArticulo(self):
-        win = tk.Toplevel(self)
-        win.title("Agregar Artículo")
-        labels = ["ID Artículo", "Nombre Artículo", "Stock", "Precio", "Tipo Artículo"]
-        entries = {}
-        for i, label in enumerate(labels):
-            tk.Label(win, text=label+":").grid(row=i, column=0)
-            entry = tk.Entry(win)
-            entry.grid(row=i, column=1)
-            entries[label] = entry
+    def ver_reservas(self):
+        # Lógica para ver reservas
+        pass
 
-        def saveArticulo():
-            try:
-                from src.UDManager.gestorAplicacion.inscripcion.articuloTiendaEscuela import ArticuloTiendaEscuela
-                art = ArticuloTiendaEscuela(
-                    idArticulo=int(entries["ID Artículo"].get()),
-                    nombreArticulo=entries["Nombre Artículo"].get(),
-                    stockArticulo=int(entries["Stock"].get()),
-                    precio=float(entries["Precio"].get()),
-                    tipoArticulo=entries["Tipo Artículo"].get()
-                )
-                tiendaEscuela.agregarArticulo(art)
-                self.refreshTienda()
-                win.destroy()
-            except Exception as e:
-                messagebox.showerror("Error", f"Error: {e}")
-
-        tk.Button(win, text="Guardar", command=saveArticulo).grid(row=len(labels), column=0, columnspan=2)
-
-    def createReservasFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.reservasListbox = tk.Listbox(frame, width=100)
-        self.reservasListbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Agregar Reserva", command=self.addReserva).pack(pady=5)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshReservas).pack(pady=5)
+    def create_torneos_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Torneos", font=("Arial", 18))
+        lbl.pack(pady=10)
+        btn_crear = tk.Button(frame, text="Crear Torneo", command=self.crear_torneo)
+        btn_crear.pack(pady=10)
+        btn_ver = tk.Button(frame, text="Ver Fixture", command=self.ver_fixture)
+        btn_ver.pack(pady=10)
+        btn_equipos = tk.Button(frame, text="Ver Equipos", command=self.ver_equipos_torneo)
+        btn_equipos.pack(pady=10)
         return frame
 
-    def refreshReservas(self):
-        self.reservasListbox.delete(0, tk.END)
-        for reserva in Reserva.listaReservas:
-            self.reservasListbox.insert(tk.END, str(reserva))
+    def crear_torneo(self):
+        # Lógica para crear torneo
+        pass
 
-    def addReserva(self):
-        win = tk.Toplevel(self)
-        win.title("Agregar Reserva")
-        labels = ["ID Cliente", "ID Instalación", "A Pagar"]
-        entries = {}
-        for i, label in enumerate(labels):
-            tk.Label(win, text=label+":").grid(row=i, column=0)
-            entry = tk.Entry(win)
-            entry.grid(row=i, column=1)
-            entries[label] = entry
+    def ver_fixture(self):
+        # Lógica para ver fixture
+        pass
 
-        def saveReserva():
-            try:
-                idCliente = int(entries["ID Cliente"].get())
-                idInstalacion = int(entries["ID Instalación"].get())
-                aPagar = int(entries["A Pagar"].get())
-                cliente = Cliente.obtenerCliente(idCliente)
-                instalacion = Instalacion.obtenerInstalacion(idInstalacion)
-                if not cliente or not instalacion:
-                    messagebox.showerror("Error", "Cliente o Instalación no encontrado.")
-                    return
-                Reserva(cliente=cliente, instalacion=instalacion, fechaReserva=None, aPagar=aPagar)
-                self.refreshReservas()
-                win.destroy()
-            except Exception as e:
-                messagebox.showerror("Error", f"Error: {e}")
+    def ver_equipos_torneo(self):
+        # Lógica para ver equipos y jugadores de torneo
+        pass
 
-        tk.Button(win, text="Guardar", command=saveReserva).grid(row=len(labels), column=0, columnspan=2)
-
-    def createInstalacionesFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.instalacionesListbox = tk.Listbox(frame, width=100)
-        self.instalacionesListbox.pack(fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshInstalaciones).pack(pady=5)
+    def create_eventos_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Eventos", font=("Arial", 18))
+        lbl.pack(pady=10)
+        btn_crear = tk.Button(frame, text="Crear Evento", command=self.crear_evento)
+        btn_crear.pack(pady=10)
+        btn_ver = tk.Button(frame, text="Ver Eventos", command=self.ver_eventos)
+        btn_ver.pack(pady=10)
         return frame
 
-    def refreshInstalaciones(self):
-        self.instalacionesListbox.delete(0, tk.END)
-        for inst in Instalacion.listaInstalaciones:
-            self.instalacionesListbox.insert(tk.END, str(inst))
+    def crear_evento(self):
+        # Lógica para crear evento
+        pass
 
-    def createTorneosFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.torneosListbox = tk.Listbox(frame, width=100)
-        self.torneosListbox.pack(fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshTorneos).pack(pady=5)
+    def ver_eventos(self):
+        # Lógica para ver eventos
+        pass
+
+    def create_pagos_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Pagos", font=("Arial", 18))
+        lbl.pack(pady=10)
+        # Se añaden botones para las funcionalidades de pago
+        btn_sus = tk.Button(frame, text="Pagar Suscripción", command=self.pagar_suscripcion)
+        btn_sus.pack(pady=5)
+        btn_cancel = tk.Button(frame, text="Cancelar Suscripción", command=self.cancelar_suscripcion)
+        btn_cancel.pack(pady=5)
+        btn_res = tk.Button(frame, text="Pagar Reserva", command=self.pagar_reserva)
+        btn_res.pack(pady=5)
+        btn_event = tk.Button(frame, text="Pagar Evento", command=self.pagar_evento)
+        btn_event.pack(pady=5)
+        btn_boleta = tk.Button(frame, text="Comprar Boleta (Evento/Torneo)", command=self.comprar_boleta)
+        btn_boleta.pack(pady=5)
+        btn_torneo = tk.Button(frame, text="Pagar Torneo", command=self.pagar_torneo)
+        btn_torneo.pack(pady=5)
         return frame
 
-    def refreshTorneos(self):
-        self.torneosListbox.delete(0, tk.END)
-        for torneo in Torneo.torneos:
-            self.torneosListbox.insert(tk.END, str(torneo))
+    def pagar_suscripcion(self):
+        # Lógica para pagar suscripción
+        pass
 
-    def createClientesFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.clientesListbox = tk.Listbox(frame, width=100)
-        self.clientesListbox.pack(fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshClientes).pack(pady=5)
+    def cancelar_suscripcion(self):
+        # Lógica para cancelar suscripción
+        pass
+
+    def pagar_reserva(self):
+        # Lógica para pagar reserva
+        pass
+
+    def pagar_evento(self):
+        messagebox.showinfo("Pago", "Funcionalidad de pago de eventos no implementada en este ejemplo.")
+
+    def comprar_boleta(self):
+        # Lógica para comprar boleta
+        pass
+
+    def pagar_torneo(self):
+        # Lógica para pagar torneo
+        pass
+
+    def create_formativo_tab(self):
+        frame = tk.Frame(self.content_frame)
+        lbl = tk.Label(frame, text="Formativo", font=("Arial", 18))
+        lbl.pack(pady=10)
+        btn_inscribir = tk.Button(frame, text="Inscribir Joven", command=self.inscribir_joven)
+        btn_inscribir.pack(pady=10)
+        btn_ver = tk.Button(frame, text="Ver Inscripciones", command=self.ver_formativos)
+        btn_ver.pack(pady=10)
         return frame
 
-    def refreshClientes(self):
-        self.clientesListbox.delete(0, tk.END)
-        for cliente in Cliente.listaClientes:
-            self.clientesListbox.insert(tk.END, str(cliente))
+    def inscribir_joven(self):
+        # Lógica para inscribir un joven
+        pass
 
-    def createBoletasFrame(self, parent):
-        frame = tk.Frame(parent)
-        self.boletasListbox = tk.Listbox(frame, width=100)
-        self.boletasListbox.pack(fill=tk.BOTH, expand=True)
-        btnFrame = tk.Frame(frame)
-        btnFrame.pack(side=tk.RIGHT, fill=tk.Y)
-        tk.Button(btnFrame, text="Refrescar", command=self.refreshBoletas).pack(pady=5)
-        return frame
+    def ver_formativos(self):
+        # Lógica para ver inscripciones formativas
+        pass
 
-    def refreshBoletas(self):
-        self.boletasListbox.delete(0, tk.END)
-        for boleta in Boleta.listaBoletas:
-            self.boletasListbox.insert(tk.END, str(boleta))
+    def enterSystem(self):
+        self.destroy()
+        from src.UDManager.uiMain.app import Application
+        app = Application()
+        app.mainloop()
 
 if __name__ == "__main__":
     app = Application()

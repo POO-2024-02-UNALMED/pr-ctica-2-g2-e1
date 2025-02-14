@@ -1,3 +1,5 @@
+# src/UDManager/gestorAplicacion/inscripcion/entrenador.py
+
 from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
 class Entrenador(Persona):
@@ -9,4 +11,4 @@ class Entrenador(Persona):
         return "Entrenador"
 
     def __str__(self):
-        return f"Entrenador: {self.getNombreCompleto()}, Deporte: {self.deporte}"
+        return f"Entrenador: {self.getNombreCompleto()} - Deporte: {self.deporte}"

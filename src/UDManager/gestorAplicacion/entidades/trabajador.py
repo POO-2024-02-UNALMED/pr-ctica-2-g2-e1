@@ -1,4 +1,6 @@
-from persona import Persona
+# src/UDManager/gestorAplicacion/entidades/trabajador.py
+
+from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
 class Trabajador(Persona):
     def __init__(self, nombre="", apellido="", rol="", edad=0):
@@ -9,5 +11,8 @@ class Trabajador(Persona):
     def getRol(self):
         return self.rol
 
-    def __str__(self):
-        return f"Trabajador: {self.getNombreCompleto()}, Rol: {self.rol}"
+    def isOcupado(self):
+        return self.ocupado
+
+    def setOcupado(self, ocupado):
+        self.ocupado = ocupado

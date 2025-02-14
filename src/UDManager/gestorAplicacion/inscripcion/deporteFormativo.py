@@ -1,3 +1,5 @@
+# src/UDManager/gestorAplicacion/inscripcion/deporteFormativo.py
+
 class DeporteFormativo:
     def __init__(self):
         self.nombre = ""
@@ -27,5 +29,4 @@ class DeporteFormativo:
             self.horario = "Tarde: 1 PM - 8 PM"
 
     def __str__(self):
-        return (f"Deporte Formativo: {self.nombre}, Categoria Equipo: {self.categoriaEquipo}, "
-                f"Horario: {self.horario}")
+        return f"DeporteFormativo: {self.nombre} - {self.deporteDeseado}"

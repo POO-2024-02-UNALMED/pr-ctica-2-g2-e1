@@ -1,20 +1,32 @@
+# src/UDManager/gestorAplicacion/eventos/evento.py
+
+from src.UDManager.gestorAplicacion.eventos.localidad import Localidad
+
 class Evento:
-    eventos = []  # Lista estática de eventos
+    eventos = []
 
     def __init__(self):
         self.nombreEvento = ""
         self.tipoEvento = ""
         self.personajePrincipal = ""
         self.generoMusical = ""
-        self.artistasInvitados = []  # Lista de cadenas
-        self.lugarPrincipal = None   # Por ejemplo, un objeto Instalacion
-        self.localidades = []        # Lista de objetos Localidad
+        self.artistasInvitados = []
+        self.lugarPrincipal = None
+        self.localidades = []
         self.toldosPatrocinados = []
         self.foodTrucks = []
-        self.personalSeguridad = []  # Lista de Trabajador
-        self.personalMedico = []     # Lista de Trabajador
-        self.reservas = []           # Lista de Reserva
-        self.boletas = []            # Lista de Boleta
+        self.personalSeguridad = []
+        self.personalMedico = []
+        self.reservas = []
+        self.boletas = []
+
+    @staticmethod
+    def getEventos():
+        return Evento.eventos
+
+    @staticmethod
+    def setEventos(lista):
+        Evento.eventos = lista
 
     def __str__(self):
-        return self.nombreEvento
+        return f"Evento: {self.nombreEvento} - Tipo: {self.tipoEvento}"

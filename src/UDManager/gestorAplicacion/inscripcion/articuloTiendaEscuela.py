@@ -1,5 +1,7 @@
+# src/UDManager/gestorAplicacion/inscripcion/articuloTiendaEscuela.py
+
 class ArticuloTiendaEscuela:
-    def __init__(self, idArticulo=0, nombreArticulo="", stockArticulo=0, precio=0.0, tipoArticulo=""):
+    def __init__(self, idArticulo, nombreArticulo, stockArticulo, precio, tipoArticulo):
         self.idArticulo = idArticulo
         self.nombreArticulo = nombreArticulo
         self.stockArticulo = stockArticulo
@@ -7,5 +9,4 @@ class ArticuloTiendaEscuela:
         self.tipoArticulo = tipoArticulo
 
     def __str__(self):
-        return (f"Articulo: {self.nombreArticulo} (ID: {self.idArticulo}) - Stock: {self.stockArticulo} - "
-                f"Precio: {self.precio} - Tipo: {self.tipoArticulo}")
+        return f"Articulo {self.idArticulo}: {self.nombreArticulo} - Stock: {self.stockArticulo} - Precio: {self.precio}"

@@ -1,25 +1,26 @@
+# src/UDManager/gestorAplicacion/inscripcion/joven.py
+
 from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
 class Joven(Persona):
-    listaJovenes = []  # Lista estática de jóvenes
+    listaJovenes = []
 
-    def __init__(self, nombre="", apellido="", id=None, edad=0, experienciaJoven=0, eps="",
-                 nombreAcudiente="", telefonoAcudiente="", cedulaAcudiente=""):
+    def __init__(self, nombre="", apellido="", id=0, edad=0, experienciaJoven=0, eps="", nombreAcudiente="", telefonoAcudiente="", cedulaAcudiente=""):
         super().__init__(nombre, apellido, edad, id)
         self.experienciaJoven = experienciaJoven
         self.eps = eps
         self.nombreAcudiente = nombreAcudiente
         self.telefonoAcudiente = telefonoAcudiente
         self.cedulaAcudiente = cedulaAcudiente
-        self.registrosEntrenamiento = []  # Lista de enteros
+        self.registrosEntrenamiento = []
         self.inscripcionPagada = False
-        self.totalArticulos = 0.0
+        self.totalArticulos = 0
         Joven.listaJovenes.append(self)
 
     def getRol(self):
         return "Joven"
 
-    def agregarRegistroEntrenamiento(self, registro):
+    def registrarEntrenamiento(self, registro):
         self.registrosEntrenamiento.append(registro)
 
     def darCategoria(self, exp):
@@ -31,4 +32,4 @@ class Joven(Persona):
             return 3
 
     def __str__(self):
-        return f"Joven: {self.getNombreCompleto()}, Edad: {self.edad}, Experiencia: {self.experienciaJoven}"
+        return f"Joven: {self.getNombreCompleto()} - Experiencia: {self.experienciaJoven} meses"

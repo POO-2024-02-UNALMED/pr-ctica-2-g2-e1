@@ -1,18 +1,19 @@
-from abc import ABC, abstractmethod
+# src/UDManager/gestorAplicacion/entidades/persona.py
 
-class Persona(ABC):
-    def __init__(self, nombre="", apellido="", edad=0, id=None):
+import pickle
+
+class Persona:
+    def __init__(self, nombre="", apellido="", edad=0, id=0):
         self.nombre = nombre
         self.apellido = apellido
         self.edad = edad
         self.id = id
 
-    @abstractmethod
-    def getRol(self):
-        pass
-
     def getNombreCompleto(self):
         return f"{self.nombre} {self.apellido}"
+
+    def getRol(self):
+        raise NotImplementedError("Debe implementar getRol() en la subclase.")
 
     def __str__(self):
         return self.getNombreCompleto()

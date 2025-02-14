@@ -1,15 +1,16 @@
-from datetime import date, timedelta
-from src.UDManager.gestorAplicacion.pagos.tipoSuscripcion import TipoSuscripcion
+# src/UDManager/gestorAplicacion/pagos/suscripcion.py
+
+from datetime import datetime, timedelta
 
 class Suscripcion:
-    def __init__(self, tipoSuscripcion=TipoSuscripcion.NOTIENE):
-        self.tipoSuscripcion = tipoSuscripcion
-        self.inicioSuscripcion = date.today()
-        self.finSuscripcion = date.today() + timedelta(days=30)
+    def __init__(self, tipo="Ninguno", costo=0):
+        self.nivel = tipo
+        self.costo_anual = costo
+        self.inicioSuscripcion = datetime.now()
+        self.finSuscripcion = datetime.now() + timedelta(days=30)
 
     def verificacionVencimiento(self):
-        return self.finSuscripcion >= date.today()
+        return self.finSuscripcion >= datetime.now()
 
     def __str__(self):
-        return (f"Información de suscripción:\nTipo: {self.tipoSuscripcion.nombre}\n"
-                f"Inicio: {self.inicioSuscripcion}\nFin: {self.finSuscripcion}")
+        return f"Suscripción: {self.nivel} (Válida hasta: {self.finSuscripcion.strftime('%Y-%m-%d')})"

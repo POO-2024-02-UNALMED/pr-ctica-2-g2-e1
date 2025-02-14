@@ -1,31 +1,35 @@
+# src/UDManager/gestorAplicacion/pagos/cliente.py
+
 from src.UDManager.gestorAplicacion.entidades.persona import Persona
 from src.UDManager.gestorAplicacion.pagos.suscripcion import Suscripcion
-from src.UDManager.gestorAplicacion.pagos.tipoSuscripcion import TipoSuscripcion
 
 class Cliente(Persona):
-    listaClientes = []  # Lista estática de clientes
+    listaClientes = []
 
-    def __init__(self, nombre, apellido, edad, id=None):
+    def __init__(self, nombre="", apellido="", edad=0, id=0):
         super().__init__(nombre, apellido, edad, id)
-        if id is None:
-            self.suscripcion = Suscripcion(TipoSuscripcion.NOTIENE)
-            self.id = len(Cliente.listaClientes) + 1
-            Cliente.listaClientes.append(self)
-        else:
-            self.suscripcion = None
-            self.id = id
+        self.suscripcion = Suscripcion("Ninguno", 0, 0, 0, 0, 0)
+        self.ID = id if id != 0 else len(Cliente.listaClientes) + 1
+        Cliente.listaClientes.append(self)
 
-    @classmethod
-    def obtenerCliente(cls, id):
-        for cliente in cls.listaClientes:
-            if cliente.id == id:
+    @staticmethod
+    def obtenerCliente(ID):
+        for cliente in Cliente.listaClientes:
+            if cliente.ID == ID:
                 return cliente
         return None
+
+    @staticmethod
+    def getListaClientes():
+        return Cliente.listaClientes
+
+    @staticmethod
+    def setListaClientes(lista):
+        Cliente.listaClientes = lista
 
     def getRol(self):
         return "Cliente"
 
     def __str__(self):
-        susc = self.suscripcion.tipoSuscripcion.nombre if self.suscripcion else "None"
-        return (f"Cliente:\nID: {self.id}\nNombre: {self.nombre}\nApellido: {self.apellido}\n"
-                f"Edad: {self.edad}\nSuscripción: {susc}")
+        return (f"Cliente: {self.getNombreCompleto()} (ID: {self.ID})\n"
+                f"Suscripción: {self.suscripcion.nivel}")

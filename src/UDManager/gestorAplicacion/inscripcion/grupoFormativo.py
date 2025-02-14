@@ -1,16 +1,27 @@
+# src/UDManager/gestorAplicacion/inscripcion/grupoFormativo.py
+
+from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
+
 class GrupoFormativo:
-    grupoFormativos = []  # Lista estática de grupos formativos
+    grupoFormativos = []
 
     def __init__(self, deporte="", instalacion=None, entrenador=None):
         self.deporte = deporte
-        self.instalacion = instalacion  # Por ejemplo, un objeto Instalacion
-        self.entrenador = entrenador    # Por ejemplo, un objeto Entrenador
-        self.jovenes = []               # Lista de objetos Joven
-        self.reserva = None           # Objeto Reserva (opcional)
-        GrupoFormativo.grupoFormativos.append(self)
+        self.instalacion = instalacion
+        self.entrenador = entrenador
+        self.jovenes = []
+        self.reserva = None
 
     def addJoven(self, joven):
         self.jovenes.append(joven)
+
+    @staticmethod
+    def getGrupoFormativos():
+        return GrupoFormativo.grupoFormativos
+
+    @staticmethod
+    def setGrupoFormativos(lista):
+        GrupoFormativo.grupoFormativos = lista
 
     def deleteJoven(self, joven):
         if joven in self.jovenes:
@@ -20,4 +31,4 @@ class GrupoFormativo:
         self.jovenes = []
 
     def __str__(self):
-        return f"Grupo Formativo de {self.deporte} con {len(self.jovenes)} jóvenes"
+        return f"GrupoFormativo de {self.deporte} - Entrenador: {self.entrenador}"
