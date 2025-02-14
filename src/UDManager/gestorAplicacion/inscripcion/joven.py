@@ -1,4 +1,4 @@
-from gestorAplicacion.entidades.persona import Persona
+from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
 class Joven(Persona):
     listaJovenes = []  # Lista estática de jóvenes

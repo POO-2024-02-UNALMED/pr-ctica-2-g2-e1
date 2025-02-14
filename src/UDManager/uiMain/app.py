@@ -1,14 +1,18 @@
 import tkinter as tk
 from tkinter import messagebox
-from uiMain.dataManager import DataManager
-from gestorAplicacion.eventos.evento import Evento
-from gestorAplicacion.inscripcion.joven import Joven
-from gestorAplicacion.reservas.instalacion import Instalacion
-from gestorAplicacion.reservas.reserva import Reserva
-from gestorAplicacion.pagos.cliente import Cliente
-from gestorAplicacion.pagos.boleta import Boleta
-from gestorAplicacion.torneo.torneo import Torneo
-from uiMain import globalInstances
+from src.UDManager.uiMain.dataManager import DataManager
+from src.UDManager.gestorAplicacion.eventos.evento import Evento
+from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
+from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
+from src.UDManager.gestorAplicacion.reservas.reserva import Reserva
+from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
+from src.UDManager.gestorAplicacion.pagos.boleta import Boleta
+from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
+from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
+from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
+
+tiendaEscuela = TiendaEscuela()
+Instalacion.crearInstalaciones()
 
 
 class Application(tk.Tk):
@@ -188,7 +192,7 @@ class Application(tk.Tk):
 
     def refreshTienda(self):
         self.tiendaListbox.delete(0, tk.END)
-        for art in globalInstances.tiendaEscuela.listarArticulos():
+        for art in tiendaEscuela.listarArticulos():
             self.tiendaListbox.insert(tk.END, str(art))
 
     def addArticulo(self):
@@ -204,7 +208,7 @@ class Application(tk.Tk):
 
         def saveArticulo():
             try:
-                from gestorAplicacion.inscripcion.articuloTiendaEscuela import ArticuloTiendaEscuela
+                from src.UDManager.gestorAplicacion.inscripcion.articuloTiendaEscuela import ArticuloTiendaEscuela
                 art = ArticuloTiendaEscuela(
                     idArticulo=int(entries["ID Artículo"].get()),
                     nombreArticulo=entries["Nombre Artículo"].get(),
@@ -212,7 +216,7 @@ class Application(tk.Tk):
                     precio=float(entries["Precio"].get()),
                     tipoArticulo=entries["Tipo Artículo"].get()
                 )
-                globalInstances.tiendaEscuela.agregarArticulo(art)
+                tiendaEscuela.agregarArticulo(art)
                 self.refreshTienda()
                 win.destroy()
             except Exception as e:

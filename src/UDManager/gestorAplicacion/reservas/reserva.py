@@ -1,4 +1,4 @@
-from gestorAplicacion.pagos.cliente import Cliente
+from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
 
 class Reserva:
     listaReservas = []

@@ -1,6 +1,6 @@
-from gestorAplicacion.entidades.persona import Persona
-from gestorAplicacion.pagos.suscripcion import Suscripcion
-from gestorAplicacion.pagos.tipoSuscripcion import TipoSuscripcion
+from src.UDManager.gestorAplicacion.entidades.persona import Persona
+from src.UDManager.gestorAplicacion.pagos.suscripcion import Suscripcion
+from src.UDManager.gestorAplicacion.pagos.tipoSuscripcion import TipoSuscripcion
 
 class Cliente(Persona):
     listaClientes = []  # Lista estática de clientes

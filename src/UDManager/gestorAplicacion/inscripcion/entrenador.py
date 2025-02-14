@@ -1,4 +1,4 @@
-from gestorAplicacion.entidades.persona import Persona
+from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
 class Entrenador(Persona):
     def __init__(self, nombre="", apellido="", edad=0, deporte=""):

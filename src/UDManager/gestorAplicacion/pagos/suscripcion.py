@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from gestorAplicacion.pagos.tipoSuscripcion import TipoSuscripcion
+from src.UDManager.gestorAplicacion.pagos.tipoSuscripcion import TipoSuscripcion
 
 class Suscripcion:
     def __init__(self, tipoSuscripcion=TipoSuscripcion.NOTIENE):
