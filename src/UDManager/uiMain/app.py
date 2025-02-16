@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import messagebox
+
 from src.UDManager.gestorAplicacion.eventos.evento import Evento
 from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
@@ -10,6 +11,9 @@ from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
 from src.UDManager.gestorAplicacion.pagos.boleta import Boleta
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
 from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
+
+# Importa tu FieldFrame
+from src.UDManager.uiMain.fieldFrame import FieldFrame
 
 tiendaEscuela = TiendaEscuela()
 Instalacion.crearInstalaciones()
@@ -57,7 +61,7 @@ class Application(tk.Tk):
         menubar.add_cascade(label="Archivo", menu=fileMenu)
         self.config(menu=menubar)
 
-        # Zona 2: Navegación y contenido
+        # Zona 2: Navegación (botones) y contenido
         self.tab_buttons_frame = tk.Frame(self, bd=2, relief="raised")
         self.tab_buttons_frame.pack(fill="x")
         self.tabs = {}
@@ -92,24 +96,90 @@ class Application(tk.Tk):
         Serializador.serializar()
         messagebox.showinfo("BD", "Base de datos guardada correctamente.")
 
+
+    # CLIENTES 
+
     def create_clientes_tab(self):
         frame = tk.Frame(self.content_frame)
         lbl = tk.Label(frame, text="Gestión de Clientes", font=("Arial", 18))
         lbl.pack(pady=10)
-        btn_crear = tk.Button(frame, text="Crear Cliente (sin suscripción)", command=self.crear_cliente)
-        btn_crear.pack(pady=10)
+
+        # Creacion del frame pal formulario
+        form_frame = tk.Frame(frame)
+        form_frame.pack(pady=10, fill="x")
+
+        criterios = ["Nombre", "Apellido", "Edad"]
+        habilitados = []
+
+        #fieldframe
+        field_frame = FieldFrame(
+            form_frame,
+            tituloCriterios="Criterio",
+            criterios=criterios,
+            tituloValores="Valor",
+            valores=None,
+            habilitado=habilitados
+        )
+        field_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Frame de botones para "Aceptar" y "Borrar"
+        btn_frame = tk.Frame(form_frame)
+        btn_frame.pack(side="bottom", pady=10)
+
+        def on_aceptar():
+            faltantes = []
+            for crit in criterios:
+                valor = field_frame.getValue(crit)
+                if not valor.strip():
+                    faltantes.append(crit)
+            if faltantes:
+                msg = "Faltan los siguientes campos: " + ", ".join(faltantes)
+                messagebox.showwarning("Campos incompletos", msg)
+            else:
+                nombre = field_frame.getValue("Nombre")
+                apellido = field_frame.getValue("Apellido")
+                try:
+                    edad = int(field_frame.getValue("Edad"))
+                except Exception:
+                    edad = 0
+                # Se crea el Cliente usando los parámetros esperados
+                nuevo_cliente = Cliente(
+                    nombre=nombre,
+                    apellido=apellido,
+                    edad=edad
+                )
+                messagebox.showinfo("Éxito", f"Cliente '{nuevo_cliente.getNombreCompleto()}' creado con ID {nuevo_cliente.ID}.")
+                # Limpiar campos
+                for crit in criterios:
+                    field_frame.setValue(crit, "")
+
+        def on_borrar():
+            for crit in criterios:
+                field_frame.setValue(crit, "")
+
+        tk.Button(btn_frame, text="Aceptar", command=on_aceptar).pack(side="left", padx=5)
+        tk.Button(btn_frame, text="Borrar", command=on_borrar).pack(side="left", padx=5)
+
+        # Se mantiene el botón "Ver Clientes"
         btn_ver = tk.Button(frame, text="Ver Clientes", command=self.ver_clientes)
         btn_ver.pack(pady=10)
+
         return frame
 
     def crear_cliente(self):
-        # Se implementa la creación de clientes mediante un diálogo
-        pass  # Se agrega la lógica real según el proyecto
-
-    def ver_clientes(self):
-        # Se implementa la visualización de clientes
+        # (Método original opcional, no se usa en esta versión)
         pass
 
+    def ver_clientes(self):
+        if not self.clientes:
+            messagebox.showinfo("Clientes", "No hay clientes registrados.")
+        else:
+            info = "Lista de clientes:\n"
+            for c in self.clientes:
+                info += f"- {c.getNombreCompleto()} (ID: {c.ID})\n"
+            messagebox.showinfo("Clientes", info)
+
+    # INSTALACIONES
     def create_instalaciones_tab(self):
         frame = tk.Frame(self.content_frame)
         lbl = tk.Label(frame, text="Instalaciones", font=("Arial", 18))
@@ -119,8 +189,9 @@ class Application(tk.Tk):
         return frame
 
     def ver_instalaciones(self):
-        # Lógica para ver instalaciones
         pass
+
+    # RESERVAS
 
     def create_reservas_tab(self):
         frame = tk.Frame(self.content_frame)
@@ -133,12 +204,13 @@ class Application(tk.Tk):
         return frame
 
     def crear_reserva(self):
-        # Lógica para crear reserva
         pass
 
     def ver_reservas(self):
-        # Lógica para ver reservas
         pass
+
+
+    # TORNEOS
 
     def create_torneos_tab(self):
         frame = tk.Frame(self.content_frame)
@@ -153,16 +225,15 @@ class Application(tk.Tk):
         return frame
 
     def crear_torneo(self):
-        # Lógica para crear torneo
         pass
 
     def ver_fixture(self):
-        # Lógica para ver fixture
         pass
 
     def ver_equipos_torneo(self):
-        # Lógica para ver equipos y jugadores de torneo
         pass
+
+    # EVENTOS
 
     def create_eventos_tab(self):
         frame = tk.Frame(self.content_frame)
@@ -175,18 +246,18 @@ class Application(tk.Tk):
         return frame
 
     def crear_evento(self):
-        # Lógica para crear evento
         pass
 
     def ver_eventos(self):
-        # Lógica para ver eventos
         pass
+
+
+    # PAGOS
 
     def create_pagos_tab(self):
         frame = tk.Frame(self.content_frame)
         lbl = tk.Label(frame, text="Pagos", font=("Arial", 18))
         lbl.pack(pady=10)
-        # Se añaden botones para las funcionalidades de pago
         btn_sus = tk.Button(frame, text="Pagar Suscripción", command=self.pagar_suscripcion)
         btn_sus.pack(pady=5)
         btn_cancel = tk.Button(frame, text="Cancelar Suscripción", command=self.cancelar_suscripcion)
@@ -202,27 +273,25 @@ class Application(tk.Tk):
         return frame
 
     def pagar_suscripcion(self):
-        # Lógica para pagar suscripción
         pass
 
     def cancelar_suscripcion(self):
-        # Lógica para cancelar suscripción
         pass
 
     def pagar_reserva(self):
-        # Lógica para pagar reserva
         pass
 
     def pagar_evento(self):
         messagebox.showinfo("Pago", "Funcionalidad de pago de eventos no implementada en este ejemplo.")
 
     def comprar_boleta(self):
-        # Lógica para comprar boleta
         pass
 
     def pagar_torneo(self):
-        # Lógica para pagar torneo
         pass
+
+
+    # FORMATIVO
 
     def create_formativo_tab(self):
         frame = tk.Frame(self.content_frame)
@@ -235,11 +304,9 @@ class Application(tk.Tk):
         return frame
 
     def inscribir_joven(self):
-        # Lógica para inscribir un joven
         pass
 
     def ver_formativos(self):
-        # Lógica para ver inscripciones formativas
         pass
 
     def enterSystem(self):
