@@ -47,6 +47,15 @@ class Instalacion:
                 return inst
         return None
 
+    @classmethod
+    def getListaInstalaciones(cls):
+        return cls.listaInstalaciones
+
+    @classmethod
+    def setListaInstalaciones(cls, listaInstalaciones):
+        cls.listaInstalaciones = listaInstalaciones
+
+
     def __str__(self):
         return (f"Instalacion:\nID: {self.id}\nNombre: {self.nombre}\nDeporte: {self.deporte}\n"
                 f"Precio/hora: {self.precioHora}")

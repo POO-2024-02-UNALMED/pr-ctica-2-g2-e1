@@ -14,7 +14,7 @@ from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscue
 from src.UDManager.uiMain.fieldFrame import FieldFrame
 
 TiendaEscuela = TiendaEscuela()
-Instalacion.crearInstalaciones()
+
 
 class Application(tk.Tk):
     def __init__(self):
@@ -26,6 +26,12 @@ class Application(tk.Tk):
         # Cargar base de datos (usando pickle en BaseDatos)
         from src.UDManager.baseDatos.deserializador import Deserializador
         Deserializador.deserializar()
+
+        # Lista Por defecto, en caso tal de que se encuentre vacia dps de deserializar
+        if not Instalacion.listaInstalaciones:
+            Instalacion.crearInstalaciones()
+
+
 
         # Listas globales
         self.clientes = Cliente.getListaClientes()
@@ -230,13 +236,44 @@ class Application(tk.Tk):
 
         tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
         tk.Button(btnFrameEdit, text="Eliminar Cliente", command=eliminarCliente).pack(side="left", padx=5)
-
+#...
     def mostrarInstalaciones(self):
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
-        title = tk.Label(self.contentFrame, text="Gestion de Instalaciones", font=("Arial", 18), bg="white")
+        title = tk.Label(self.contentFrame, text="Gestión de Instalaciones", font=("Arial", 18), bg="white")
         title.pack(pady=10)
-        tk.Button(self.contentFrame, text="Ver Instalaciones", command=self.verInstalaciones).pack(pady=10)
+
+        formFrame = tk.Frame(self.contentFrame, bg="white")
+        formFrame.pack(pady=10, fill="x")
+
+        # FieldFrame para crear una nueva instalación
+        criteria = ["Nombre", "Deporte", "Precio Hora"]
+        fieldFrameInst = FieldFrame(formFrame, "Campo", criteria, "Valor")
+        fieldFrameInst.pack(fill="both", expand=True, padx=10, pady=10)
+
+        btnFrame = tk.Frame(formFrame, bg="white")
+        btnFrame.pack(side="bottom", pady=10)
+
+        def agregarInstalacion():
+            missing = [crit for crit in criteria if not fieldFrameInst.getValue(crit).strip()]
+            if missing:
+                messagebox.showwarning("Campos Incompletos", "Faltan: " + ", ".join(missing))
+            else:
+                nombre = fieldFrameInst.getValue("Nombre")
+                deporte = fieldFrameInst.getValue("Deporte")
+                try:
+                    precioHora = float(fieldFrameInst.getValue("Precio Hora"))
+                except ValueError:
+                    messagebox.showerror("Error", "El precio debe ser un valor numérico.")
+                    return
+                nuevaInst = Instalacion(nombre, deporte, precioHora)
+                messagebox.showinfo("Éxito", f"Instalación '{nombre}' creada con ID {nuevaInst.id}.")
+                for crit in criteria:
+                    fieldFrameInst.setValue(crit, "")
+
+        tk.Button(btnFrame, text="Agregar Instalación", command=agregarInstalacion).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Ver Instalaciones", command=self.verInstalaciones).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Editar Instalaciones", command=self.editarInstalaciones).pack(side="left", padx=5)
 
     def verInstalaciones(self):
         if not self.instalaciones:
@@ -244,22 +281,132 @@ class Application(tk.Tk):
         else:
             info = "Lista de Instalaciones:\n"
             for inst in self.instalaciones:
-                info += f"- {inst.getNombre()} (ID: {inst.getId()})\n"
+                info += f"- {inst.nombre} (ID: {inst.id})\n"
             messagebox.showinfo("Instalaciones", info)
 
+    def editarInstalaciones(self):
+        editWin = tk.Toplevel(self)
+        editWin.title("Editar Instalaciones")
+        editWin.geometry("400x400")
+
+        lbl = tk.Label(editWin, text="Seleccione una instalación para editar:", font=("Arial", 12))
+        lbl.pack(pady=5)
+
+        listbox = tk.Listbox(editWin)
+        listbox.pack(fill="both", expand=True, padx=10, pady=5)
+        for inst in self.instalaciones:
+            listbox.insert(tk.END, f"{inst.id} - {inst.nombre}")
+
+        formFrame = tk.Frame(editWin)
+        formFrame.pack(fill="x", padx=10, pady=10)
+        criteria = ["Nombre", "Deporte", "Precio Hora"]
+        fieldFrameEdit = FieldFrame(formFrame, "Campo", criteria, "Valor")
+        fieldFrameEdit.pack(fill="both", expand=True)
+
+        def cargarInstalacion(event):
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                inst = self.instalaciones[index]
+                fieldFrameEdit.setValue("Nombre", inst.nombre)
+                fieldFrameEdit.setValue("Deporte", inst.deporte)
+                fieldFrameEdit.setValue("Precio Hora", str(inst.precioHora))
+
+        listbox.bind("<<ListboxSelect>>", cargarInstalacion)
+
+        btnFrameEdit = tk.Frame(editWin)
+        btnFrameEdit.pack(pady=10)
+
+        def guardarCambios():
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                inst = self.instalaciones[index]
+                inst.nombre = fieldFrameEdit.getValue("Nombre")
+                inst.deporte = fieldFrameEdit.getValue("Deporte")
+                try:
+                    inst.precioHora = float(fieldFrameEdit.getValue("Precio Hora"))
+                except ValueError:
+                    messagebox.showerror("Error", "El precio debe ser un valor numérico.")
+                    return
+                messagebox.showinfo("Éxito", f"Instalación '{inst.nombre}' actualizada.")
+                listbox.delete(index)
+                listbox.insert(index, f"{inst.id} - {inst.nombre}")
+            else:
+                messagebox.showwarning("Selección", "Seleccione una instalación para editar.")
+
+        def eliminarInstalacion():
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                inst = self.instalaciones[index]
+                if messagebox.askyesno("Confirmar", f"¿Está seguro de eliminar la instalación '{inst.nombre}'?"):
+                    del self.instalaciones[index]
+                    listbox.delete(index)
+                    messagebox.showinfo("Eliminado", "Instalación eliminada.")
+            else:
+                messagebox.showwarning("Selección", "Seleccione una instalación para eliminar.")
+
+        tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
+        tk.Button(btnFrameEdit, text="Eliminar Instalación", command=eliminarInstalacion).pack(side="left", padx=5)
+#...........
     def mostrarReservas(self):
+        # Limpia la zona de contenido
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
-        title = tk.Label(self.contentFrame, text="Gestion de Reservas", font=("Arial", 18), bg="white")
+
+        # Título para la sección
+        title = tk.Label(self.contentFrame, text="Gestión de Reservas", font=("Arial", 18), bg="white")
         title.pack(pady=10)
-        tk.Button(self.contentFrame, text="Crear Reserva", command=self.crearReserva).pack(pady=10)
-        tk.Button(self.contentFrame, text="Ver Reservas", command=self.verReservas).pack(pady=10)
 
-    def crearReserva(self):
-        pass
+        # Frame para el formulario de nueva reserva
+        formFrame = tk.Frame(self.contentFrame, bg="white")
+        formFrame.pack(pady=10, fill="x")
 
-    def verReservas(self):
-        pass
+        # Definir los campos para la reserva
+        criteria = ["ID Cliente", "ID Instalación", "Fecha Reserva", "Monto a Pagar"]
+        fieldFrameReserva = FieldFrame(formFrame, "Campo", criteria, "Valor")
+        fieldFrameReserva.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Frame para los botones
+        btnFrame = tk.Frame(formFrame, bg="white")
+        btnFrame.pack(side="bottom", pady=10)
+
+        def crearReserva():
+            # Validar que todos los campos estén completos
+            missing = [crit for crit in criteria if not fieldFrameReserva.getValue(crit).strip()]
+            if missing:
+                messagebox.showwarning("Campos Incompletos", "Faltan: " + ", ".join(missing))
+                return
+
+            try:
+                idCliente = int(fieldFrameReserva.getValue("ID Cliente"))
+                idInstalacion = int(fieldFrameReserva.getValue("ID Instalación"))
+                monto = float(fieldFrameReserva.getValue("Monto a Pagar"))
+            except ValueError:
+                messagebox.showerror("Error", "Verifica que el ID y el monto sean valores numéricos.")
+                return
+
+            # Obtener cliente e instalación
+            cliente = Cliente.obtenerCliente(idCliente)
+            instalacion = Instalacion.obtenerInstalacion(idInstalacion)
+            if cliente is None or instalacion is None:
+                messagebox.showerror("Error", "Cliente o Instalación no válidos.")
+                return
+
+            fechaReserva = fieldFrameReserva.getValue("Fecha Reserva")
+            # Crear la nueva reserva
+            nuevaReserva = Reserva(cliente, instalacion, fechaReserva, monto)
+            messagebox.showinfo("Éxito", f"Reserva creada con ID {nuevaReserva.ID}")
+            # Limpiar el formulario
+            for crit in criteria:
+                fieldFrameReserva.setValue(crit, "")
+
+        # Botones para crear, ver y editar reservas
+        tk.Button(btnFrame, text="Crear Reserva", command=crearReserva).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Ver Reservas", command=self.verReservas).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Editar Reservas", command=self.editarReservas).pack(side="left", padx=5)
+#.
 
     def mostrarTorneos(self):
         for widget in self.contentFrame.winfo_children():
@@ -269,6 +416,83 @@ class Application(tk.Tk):
         tk.Button(self.contentFrame, text="Crear Torneo", command=self.crearTorneo).pack(pady=10)
         tk.Button(self.contentFrame, text="Ver Fixture", command=self.verFixture).pack(pady=10)
         tk.Button(self.contentFrame, text="Ver Equipos", command=self.verEquiposTorneo).pack(pady=10)
+
+    def editarReservas(self):
+        editWin = tk.Toplevel(self)
+        editWin.title("Editar Reservas")
+        editWin.geometry("400x400")
+
+        lbl = tk.Label(editWin, text="Seleccione una reserva para editar:", font=("Arial", 12))
+        lbl.pack(pady=5)
+
+        listbox = tk.Listbox(editWin)
+        listbox.pack(fill="both", expand=True, padx=10, pady=5)
+        for reserva in Reserva.listaReservas:
+            listbox.insert(tk.END,
+                           f"{reserva.ID} - {reserva.cliente.getNombreCompleto()} en {reserva.instalacion.nombre}")
+
+        formFrame = tk.Frame(editWin)
+        formFrame.pack(fill="x", padx=10, pady=10)
+        criteria = ["ID Cliente", "ID Instalación", "Fecha Reserva", "Monto a Pagar"]
+        fieldFrameEdit = FieldFrame(formFrame, "Campo", criteria, "Valor")
+        fieldFrameEdit.pack(fill="both", expand=True)
+
+        def cargarReserva(event):
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                reserva = Reserva.listaReservas[index]
+                fieldFrameEdit.setValue("ID Cliente", str(reserva.cliente.ID))
+                fieldFrameEdit.setValue("ID Instalación", str(reserva.instalacion.id))
+                fieldFrameEdit.setValue("Fecha Reserva", reserva.fechaReserva)
+                fieldFrameEdit.setValue("Monto a Pagar", str(reserva.aPagar))
+
+        listbox.bind("<<ListboxSelect>>", cargarReserva)
+
+        btnFrameEdit = tk.Frame(editWin)
+        btnFrameEdit.pack(pady=10)
+
+        def guardarCambios():
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                reserva = Reserva.listaReservas[index]
+                try:
+                    idCliente = int(fieldFrameEdit.getValue("ID Cliente"))
+                    idInstalacion = int(fieldFrameEdit.getValue("ID Instalación"))
+                    monto = float(fieldFrameEdit.getValue("Monto a Pagar"))
+                except ValueError:
+                    messagebox.showerror("Error", "Verifica que los campos numéricos sean correctos.")
+                    return
+                cliente = Cliente.obtenerCliente(idCliente)
+                instalacion = Instalacion.obtenerInstalacion(idInstalacion)
+                if cliente is None or instalacion is None:
+                    messagebox.showerror("Error", "Cliente o Instalación no válidos.")
+                    return
+                reserva.cliente = cliente
+                reserva.instalacion = instalacion
+                reserva.fechaReserva = fieldFrameEdit.getValue("Fecha Reserva")
+                reserva.aPagar = monto
+                messagebox.showinfo("Éxito", f"Reserva {reserva.ID} actualizada.")
+                listbox.delete(index)
+                listbox.insert(index, f"{reserva.ID} - {cliente.getNombreCompleto()} en {instalacion.nombre}")
+            else:
+                messagebox.showwarning("Selección", "Seleccione una reserva para editar.")
+
+        def eliminarReserva():
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                reserva = Reserva.listaReservas[index]
+                if messagebox.askyesno("Confirmar", f"¿Está seguro de eliminar la reserva {reserva.ID}?"):
+                    del Reserva.listaReservas[index]
+                    listbox.delete(index)
+                    messagebox.showinfo("Eliminado", "Reserva eliminada.")
+            else:
+                messagebox.showwarning("Selección", "Seleccione una reserva para eliminar.")
+
+        tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
+        tk.Button(btnFrameEdit, text="Eliminar Reserva", command=eliminarReserva).pack(side="left", padx=5)
 
     def crearTorneo(self):
         pass
@@ -338,6 +562,8 @@ class Application(tk.Tk):
         pass
 
     def salir(self):
+        from src.UDManager.baseDatos.serializador import Serializador
+        Serializador.serializar()
         self.destroy()
         from src.UDManager.uiMain.inicio import InicioWindow
         inicioWindow = InicioWindow()
