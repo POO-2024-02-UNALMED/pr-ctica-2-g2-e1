@@ -993,20 +993,174 @@ class Application(tk.Tk):
 
     def pagarTorneo(self):
         pass
+###FORMATIVO
+    
+    def UltimoDiaDelMes(self, fecha):
+        if fecha.month == 12:
+            return 31
+        proximoMes = fecha.replace(month=fecha.month + 1, day=1)
+        return (proximoMes - timedelta(days=1)).day
 
     def mostrarFormativo(self):
+        # Limpia el contentFrame
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
-        title = tk.Label(self.contentFrame, text="Area Formativa", font=("Arial", 18), bg="white")
+
+        title = tk.Label(self.contentFrame, text="Área Formativa", font=("Arial", 18), bg="white")
         title.pack(pady=10)
-        tk.Button(self.contentFrame, text="Inscribir Joven", command=self.inscribirJoven).pack(pady=10)
-        tk.Button(self.contentFrame, text="Ver Inscripciones", command=self.verFormativos).pack(pady=10)
+
+        formFrame = tk.Frame(self.contentFrame, bg="white")
+        formFrame.pack(pady=10, fill="x")
+
+        # Campos que pedimos al usuario
+        criteria = ["nombre", "apellido", "edad", "experienciaJoven", "eps",
+                    "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]
+
+        # Definimos los horarios disponibles (diasemana: 0 = lunes, 6 = domingo)
+        self.horariosDisponibles = {
+            "Lunes-Miércoles 8-10": [0, 2],
+            "Lunes-Miércoles 10-12": [0, 2],
+            "Martes-Jueves 8-10": [1, 3],
+            "Martes-Jueves 10-12": [1, 3],
+            "Viernes 14-16": [4]
+        }
+
+        #FieldFrame para los campos de texto
+        fieldFrame = FieldFrame(formFrame, "Campo", criteria, "Valor")
+        fieldFrame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # OptionMenu para "deporte"
+        tk.Label(formFrame, text="Deporte:", font=("Arial", 12), bg="white").pack(pady=5)
+        deportes = ["Fútbol", "Baloncesto", "Natación", "Tenis"]
+        self.deporteVar = tk.StringVar()
+        self.deporteVar.set(deportes[0])  # Valor inicial
+        opMenuDeporte = tk.OptionMenu(formFrame, self.deporteVar, *deportes)
+        opMenuDeporte.pack()
+
+        btnFrame = tk.Frame(formFrame, bg="white")
+        btnFrame.pack(side="bottom", pady=10)
+
+        tk.Button(btnFrame, text="Crear Joven", command=lambda: self.crearJoven(fieldFrame)).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Inscribir Joven", command=self.inscribirJoven).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Ver Jovenes", command=self.mostrarInscripciones).pack(side="left", padx=5)
+
+    def crearJoven(self, fieldFrame):
+        # Obtenemos los valores del FieldFrame (sin "deporte")
+        valores = [fieldFrame.getValue(c).strip() for c in
+                   ["nombre", "apellido", "edad", "experienciaJoven", "eps",
+                    "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]]
+
+        # Verificamos campos vacíos
+        if "" in valores:
+            messagebox.showwarning("Campos Incompletos", "Todos los campos son obligatorios.")
+            return
+
+        # Convertimos a int los campos "edad" y "experienciaJoven"
+        try:
+            edad = int(valores[2])
+            experiencia = int(valores[3])
+        except ValueError:
+            messagebox.showerror("Error", "Edad y Experiencia deben ser números.")
+            return
+
+        # Obtenemos el deporte seleccionado en el OptionMenu
+        deporteSeleccionado = self.deporteVar.get()
+
+        # Calculamos un nuevo ID
+        nuevoId = max([int(j.id) for j in Joven.listaJovenes if isinstance(j.id, int)], default=0) + 1
+
+        # Creamos el objeto Joven
+        nuevoJoven = Joven(
+            valores[0],  # nombre
+            valores[1],  # apellido
+            nuevoId,
+            edad,
+            experiencia,
+            valores[4],  # eps
+            valores[5],  # nombreAcudiente
+            valores[6],  # telefonoAcudiente
+            valores[7]  # cedulaAcudiente
+        )
+        # Asignamos el deporte que viene del OptionMenu
+        nuevoJoven.deporte = deporteSeleccionado
+
+        messagebox.showinfo("Éxito",
+                            f"Joven {nuevoJoven.getNombreCompleto()} creado correctamente con ID {nuevoJoven.id}. "
+                            "Ahora puede inscribirlo en un horario.")
 
     def inscribirJoven(self):
-        pass
+        # Ventana emergente para inscribir
+        inscripcionWindow = tk.Toplevel(self.contentFrame)
+        inscripcionWindow.title("Inscribir Joven")
 
-    def verFormativos(self):
-        pass
+        tk.Label(inscripcionWindow, text="Seleccione un Joven", font=("Arial", 12)).pack(pady=5)
+
+        # Construccion de  la lista de jóvenes no inscritos
+        jovenesNoInscritos = [j for j in Joven.listaJovenes if not j.inscripcionPagada]
+        if not jovenesNoInscritos:
+            messagebox.showinfo("Aviso", "No hay jóvenes disponibles para inscripción.")
+            inscripcionWindow.destroy()
+            return
+
+        #creacion de listas paralelas para OptionMenu
+        self.jovenesLabels = [f"{j.getNombreCompleto()} (ID: {j.id})" for j in jovenesNoInscritos]
+        self.jovenesRefs = jovenesNoInscritos
+
+        jovenVar = tk.StringVar()
+        jovenVar.set(self.jovenesLabels[0])  # Primera opción por defecto
+        jovenMenu = tk.OptionMenu(inscripcionWindow, jovenVar, *self.jovenesLabels)
+        jovenMenu.pack()
+
+        tk.Label(inscripcionWindow, text="Seleccione un Horario", font=("Arial", 12)).pack(pady=5)
+        horarioVar = tk.StringVar()
+        horarioVar.set(list(self.horariosDisponibles.keys())[0])
+        horarioMenu = tk.OptionMenu(inscripcionWindow, horarioVar, *self.horariosDisponibles.keys())
+        horarioMenu.pack()
+
+        def confirmar():
+            etiquetaSeleccionada = jovenVar.get()
+            indice = self.jovenesLabels.index(etiquetaSeleccionada)
+            joven = self.jovenesRefs[indice]
+
+            joven.inscripcionPagada = True
+            joven.horario = horarioVar.get()
+
+            diasValidos = self.horariosDisponibles[joven.horario]
+            fechas = []
+            hoy = datetime.today()
+            ultimoDiaMes = self.UltimoDiaDelMes(hoy)
+
+            for dia in range(1, ultimoDiaMes + 1):
+                fecha = hoy.replace(day=dia)
+                if fecha.weekday() in diasValidos:
+                    fechas.append(fecha.strftime("%d/%m/%y"))
+
+            joven.fechas = fechas
+
+            messagebox.showinfo("Inscripción Exitosa",
+                                f"Joven {joven.getNombreCompleto()} inscrito en {joven.deporte} "
+                                f"en las fechas {', '.join(fechas)} en el horario {joven.horario}.")
+
+            from src.UDManager.baseDatos.serializador import Serializador
+            Serializador.serializar()
+            inscripcionWindow.destroy()
+
+        tk.Button(inscripcionWindow, text="Inscribir", command=confirmar).pack(pady=10)
+
+    def mostrarInscripciones(self):
+        inscripciones = []
+        for j in Joven.listaJovenes:
+            estado = "Inscrito" if j.inscripcionPagada else "No Inscrito"
+            fechasStr = ", ".join(j.fechas) if hasattr(j, "fechas") and j.fechas else "Sin fechas"
+            inscripciones.append(f"{j.getNombreCompleto()} (ID: {j.id}) - {j.deporte} - {estado} - {fechasStr}")
+
+        if inscripciones:
+            messagebox.showinfo("Inscripciones", "\n".join(inscripciones))
+        else:
+            messagebox.showinfo("Inscripciones", "No hay jóvenes registrados.")
+
+
+#-------
 
     def salir(self):
         from src.UDManager.baseDatos.serializador import Serializador

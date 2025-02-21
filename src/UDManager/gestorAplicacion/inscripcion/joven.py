@@ -15,6 +15,7 @@ class Joven(Persona):
         self.registrosEntrenamiento = []
         self.inscripcionPagada = False
         self.totalArticulos = 0
+        self.fechas = []
         Joven.listaJovenes.append(self)
 
     def getRol(self):

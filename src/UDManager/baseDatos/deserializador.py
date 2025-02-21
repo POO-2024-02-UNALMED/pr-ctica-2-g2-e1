@@ -6,6 +6,7 @@ import src.UDManager.gestorAplicacion.pagos.cliente as cl
 import src.UDManager.gestorAplicacion.reservas.reserva as res
 import src.UDManager.gestorAplicacion.reservas.instalacion as inst
 import src.UDManager.gestorAplicacion.torneo.torneo as tor
+from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 import pickle
 
 class Deserializador:
@@ -20,5 +21,6 @@ class Deserializador:
                 tor.Torneo.setTorneos(data.get("torneos", []))
                 gf.GrupoFormativo.setGrupoFormativos(data.get("grupoFormativos", []))
                 ev.Evento.setEventos(data.get("eventos", []))
+                Joven.listaJovenes = data.get("jovenes", [])
         except (FileNotFoundError, EOFError):
             print("No se encontró el archivo de base de datos o está vacío. Se iniciará con datos por defecto.")

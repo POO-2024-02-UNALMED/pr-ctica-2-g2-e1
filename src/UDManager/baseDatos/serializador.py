@@ -6,6 +6,7 @@ import src.UDManager.gestorAplicacion.pagos.cliente as cl
 import src.UDManager.gestorAplicacion.reservas.reserva as res
 import src.UDManager.gestorAplicacion.reservas.instalacion as inst
 import src.UDManager.gestorAplicacion.torneo.torneo as tor
+from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 import pickle
 
 class Serializador:
@@ -21,7 +22,9 @@ class Serializador:
                     "instalaciones": inst.Instalacion.getListaInstalaciones(),
                     "torneos": tor.Torneo.getTorneos(),
                     "grupoFormativos": gf.GrupoFormativo.getGrupoFormativos(),
-                    "eventos": ev.Evento.getEventos()
+                    "eventos": ev.Evento.getEventos(),
+                    "jovenes": Joven.listaJovenes
+
                 }, f)
                 print("Serialización exitosa")
         except Exception as e:
