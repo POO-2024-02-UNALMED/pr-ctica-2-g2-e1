@@ -11,6 +11,10 @@ class Instalacion:
         self.localidades = []
         Instalacion.listaInstalaciones.append(self)
 
+    def agregar_reserva(self, reserva):
+        """Agrega una reserva a la lista de reservas de la instalación."""
+        self.reservas.append(reserva)
+
     @staticmethod
     def deporteViaNumero(opcion):
         if opcion == 1:
@@ -54,7 +58,6 @@ class Instalacion:
     @classmethod
     def setListaInstalaciones(cls, listaInstalaciones):
         cls.listaInstalaciones = listaInstalaciones
-
 
     def __str__(self):
         return (f"Instalacion:\nID: {self.id}\nNombre: {self.nombre}\nDeporte: {self.deporte}\n"
