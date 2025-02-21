@@ -457,19 +457,67 @@ class Application(tk.Tk):
         formFrame = tk.Frame(self.contentFrame, bg="white")
         formFrame.pack(pady=10, fill="x")
 
-        # Inicializar el FieldFrame vacío
-        criteria = []
-        fieldFrameReserva = FieldFrame(formFrame, "Campo", criteria, "Valor")
-        fieldFrameReserva.pack(fill="both", expand=True, padx=10, pady=10)
+        # Mostrar la última reserva si existe
+        if Reserva.listaReservas:
+            ultimaReserva = Reserva.listaReservas[-1]  # Obtener la última reserva
+
+            # Datos de la última reserva
+            criteria = ["Cliente", "Instalación", "Fecha Reserva", "Hora Inicio", "Hora Fin", "Monto a Pagar"]
+            values = [
+                ultimaReserva.cliente.getNombreCompleto(),
+                ultimaReserva.instalacion.nombre,
+                ultimaReserva.fechaReserva.getInicioReserva().strftime("%Y-%m-%d"),  # Usar getInicioReserva()
+                ultimaReserva.fechaReserva.getInicioReserva().strftime("%H:%M"),  # Hora de inicio
+                ultimaReserva.fechaReserva.getFinReserva().strftime("%H:%M"),  # Hora de fin
+                f"${ultimaReserva.aPagar:.2f}"  # Monto a pagar formateado (cambio aquí)
+            ]
+
+            # Crear un FieldFrame con los datos de la última reserva y marcar todos los campos como solo lectura
+            fieldFrameReserva = FieldFrame(formFrame, "Campo", criteria, "Valor", values, ReadOnly=criteria)
+            fieldFrameReserva.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Botones para las reservas
+        btnFrame = tk.Frame(formFrame, bg="white")
+        btnFrame.pack(side="bottom", pady=10)
+
+        tk.Button(btnFrame, text="Crear Reserva", command=self.mostrarMenuCreacionReserva).pack(side="left", padx=5)
+        tk.Button(btnFrame, text="Ver Reservas", command=self.verReservas).pack(side="left", padx=5)
+        # Listbox para mostrar las reservas
+        listbox = tk.Listbox(formFrame, selectmode=tk.SINGLE, height=10, width=80)
+        listbox.pack(padx=10, pady=10)
+
+        # Mostrar todas las reservas en el Listbox
+        for reserva in Reserva.listaReservas:
+            listbox.insert(tk.END,
+                           f"ID: {reserva.ID} - Cliente: {reserva.cliente.getNombreCompleto()} - Instalación: {reserva.instalacion.nombre} - Fecha: {reserva.fechaReserva.getInicioReserva().strftime('%Y-%m-%d %H:%M')}")
 
         # Frame para los botones
         btnFrame = tk.Frame(formFrame, bg="white")
         btnFrame.pack(side="bottom", pady=10)
+        tk.Button(btnFrame, text="Eliminar Reserva", command=lambda: self.eliminarReserva(listbox)).pack(side="left",
+                                                                                                         padx=5)
 
-        # Botón para mostrar el menú de creación de reservas
-        tk.Button(btnFrame, text="Crear Reserva", command=self.mostrarMenuCreacionReserva).pack(side="left", padx=5)
-        tk.Button(btnFrame, text="Ver Reservas", command=self.verReservas).pack(side="left", padx=5)
-        tk.Button(btnFrame, text="Editar Reservas", command=self.editarReservas).pack(side="left", padx=5)
+    def eliminarReserva(self, listbox):
+        try:
+            # Obtener la selección del listbox
+            seleccion = listbox.curselection()
+            if seleccion:
+                index = seleccion[0]  # Obtener el índice de la reserva seleccionada
+                reservaSeleccionada = Reserva.listaReservas[index]  # Obtener la reserva
+
+                # Confirmación para eliminar
+                confirmacion = messagebox.askyesno("Confirmar",
+                                                   f"¿Está seguro de eliminar la reserva con ID {reservaSeleccionada.ID}?")
+
+                if confirmacion:
+                    # Eliminar la reserva de la lista
+                    Reserva.listaReservas.remove(reservaSeleccionada)
+                    messagebox.showinfo("Eliminado", "Reserva eliminada exitosamente.")
+                    self.mostrarReservas()  # Actualizar la vista de reservas
+            else:
+                messagebox.showwarning("Selección", "Seleccione una reserva para eliminar.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Hubo un error al eliminar la reserva: {str(e)}")
 
     def mostrarTorneos(self):
         for widget in self.contentFrame.winfo_children():
