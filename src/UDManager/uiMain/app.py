@@ -1,6 +1,11 @@
+import pickle
+import random
+import tkinter
 import tkinter as tk
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import messagebox
+
+from tkcalendar import Calendar
 
 from src.UDManager.baseDatos.serializador import Serializador
 from src.UDManager.gestorAplicacion.eventos.evento import Evento
@@ -10,6 +15,7 @@ from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
 from src.UDManager.gestorAplicacion.reservas.reserva import Reserva
 from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
 from src.UDManager.gestorAplicacion.pagos.boleta import Boleta
+from src.UDManager.gestorAplicacion.torneo.equipo import Equipo
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
 from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
 
@@ -527,6 +533,7 @@ class Application(tk.Tk):
         tk.Button(self.contentFrame, text="Crear Torneo", command=self.crearTorneo).pack(pady=10)
         tk.Button(self.contentFrame, text="Ver Fixture", command=self.verFixture).pack(pady=10)
         tk.Button(self.contentFrame, text="Ver Equipos", command=self.verEquiposTorneo).pack(pady=10)
+        tk.Button(self.contentFrame, text= "Editar Equipos", command=self.editarEquipos).pack(pady=5)
 
     def crearReserva(self):
         print("El método crearReserva ha sido llamado.")  # Confirmamos la ejecución del método
@@ -734,7 +741,208 @@ class Application(tk.Tk):
         tk.Button(btnFrameEdit, text="Eliminar Reserva", command=eliminarReserva).pack(side="left", padx=5)
 
     def crearTorneo(self):
-        pass
+        # Crear una nueva ventana para la creación del torneo
+        torneoWin = tk.Toplevel(self)
+        torneoWin.title("Crear Torneo")
+        torneoWin.geometry("600x600")
+
+        # Selección de cliente (desplegable)
+        labelCliente = tk.Label(torneoWin, text="Selecciona un Cliente", font=("Arial", 12))
+        labelCliente.pack(pady=5)
+        clientes = [f"{cliente.ID} - {cliente.getNombreCompleto()}" for cliente in self.clientes]
+        clienteSelect = tk.StringVar(torneoWin)
+        clienteSelect.set(clientes[0])  # Establecer por defecto el primer cliente
+        clienteDropdown = tk.OptionMenu(torneoWin, clienteSelect, *clientes)
+        clienteDropdown.pack(pady=5)
+
+        # Ingreso de nombre del torneo
+        labelNombre = tk.Label(torneoWin, text="Nombre del Torneo", font=("Arial", 12))
+        labelNombre.pack(pady=5)
+        nombreTorneoEntry = tk.Entry(torneoWin)
+        nombreTorneoEntry.pack(pady=5)
+
+        # Selección de deporte
+        labelDeporte = tk.Label(torneoWin, text="Selecciona un Deporte", font=("Arial", 12))
+        labelDeporte.pack(pady=5)
+        deportes = ["Futbol", "Baloncesto", "Natación", "Voleibol"]
+        deporteSelect = tk.StringVar(torneoWin)
+        deporteSelect.set(deportes[0])  # Establecer por defecto el primer deporte
+        deporteDropdown = tk.OptionMenu(torneoWin, deporteSelect, *deportes)
+        deporteDropdown.pack(pady=5)
+
+        # Función para filtrar las instalaciones según el deporte seleccionado
+        def filtrarInstalaciones(instalacion, deporte):
+            """Filtra las instalaciones según el deporte."""
+            return instalacion.deporte.lower() == deporte.lower()
+
+        # Actualizar instalaciones dependiendo del deporte seleccionado
+        def actualizarInstalaciones(*args):
+            """Actualiza las instalaciones en el desplegable según el deporte seleccionado"""
+            deporteSeleccionado = deporteSelect.get()
+            instalacionesFiltradas = [inst.nombre for inst in self.instalaciones if
+                                      filtrarInstalaciones(inst, deporteSeleccionado)]
+            instalacionSelect.set(instalacionesFiltradas[
+                                      0] if instalacionesFiltradas else "")  # Establecer por defecto la primera instalación
+            instalacionDropdown['menu'].delete(0, 'end')  # Limpiar el menú
+            for instalacion in instalacionesFiltradas:
+                instalacionDropdown['menu'].add_command(label=instalacion,
+                                                        command=tk._setit(instalacionSelect, instalacion))
+
+        # Llamar a la actualización de instalaciones cuando el deporte cambia
+        deporteSelect.trace('w', actualizarInstalaciones)
+
+        # Selección de instalación (basado en el deporte)
+        labelInstalacion = tk.Label(torneoWin, text="Selecciona una Instalación", font=("Arial", 12))
+        labelInstalacion.pack(pady=5)
+        # Inicializar instalacionSelect
+        instalacionSelect = tk.StringVar(torneoWin)
+        instalacionDropdown = tk.OptionMenu(torneoWin, instalacionSelect, "")  # Vacío inicialmente
+        instalacionDropdown.pack(pady=5)
+
+        # Ingreso de los 5 equipos
+        labelEquipos = tk.Label(torneoWin, text="Nombre de los 5 Equipos", font=("Arial", 12))
+        labelEquipos.pack(pady=5)
+        equipos = []
+        for i in range(5):  # Limitamos a 5 equipos
+            labelEquipo = tk.Label(torneoWin, text=f"Equipo {i + 1}", font=("Arial", 12))
+            labelEquipo.pack(pady=5)
+            equipoEntry = tk.Entry(torneoWin)
+            equipoEntry.pack(pady=5)
+            equipos.append(equipoEntry)
+
+        # Fechas de inicio y fin con calendarios
+        labelFechaInicio = tk.Label(torneoWin, text="Fecha de Inicio", font=("Arial", 12))
+        labelFechaInicio.pack(pady=5)
+
+        # Usamos el calendario para la fecha de inicio
+        calendarioInicio = Calendar(torneoWin, selectmode="day", date_pattern="yyyy-mm-dd")
+        calendarioInicio.pack(pady=5, side="left", padx=5)
+
+        labelFechaFin = tk.Label(torneoWin, text="Fecha de Fin", font=("Arial", 12))
+        labelFechaFin.pack(pady=5)
+
+        # Usamos el calendario para la fecha de fin
+        calendarioFin = Calendar(torneoWin, selectmode="day", date_pattern="yyyy-mm-dd")
+        calendarioFin.pack(pady=5, side="left", padx=5)
+
+        # Botón Aceptar
+        aceptarBtn = tk.Button(torneoWin, text="Aceptar",
+                               command=lambda: self.onAceptar(clienteSelect, nombreTorneoEntry, deporteSelect,
+                                                              instalacionSelect, calendarioInicio, calendarioFin,
+                                                              equipos,torneoWin))
+        aceptarBtn.pack(pady=20)
+
+    def onAceptar(self, clienteSelect, nombreTorneoEntry, deporteSelect, instalacionSelect, calendarioInicio,
+                  calendarioFin, equipos, torneoWin):
+        clienteSeleccionado = next(cliente for cliente in self.clientes if
+                                   f"{cliente.ID} - {cliente.getNombreCompleto()}" == clienteSelect.get())
+        nombreTorneo = nombreTorneoEntry.get()
+        deporte = deporteSelect.get()
+
+        # Validar que se haya seleccionado una instalación
+        try:
+            instalacion = next(inst for inst in self.instalaciones if inst.nombre == instalacionSelect.get())
+        except StopIteration:
+            messagebox.showerror("Error", "La instalación seleccionada no es válida.")
+            return
+
+        # Validar fechas
+        try:
+            fechaInicio = datetime.strptime(calendarioInicio.get_date(), "%Y-%m-%d")
+            fechaFin = datetime.strptime(calendarioFin.get_date(), "%Y-%m-%d")
+            if (fechaFin - fechaInicio).days < 3:
+                raise ValueError("La duración del torneo debe ser de al menos 3 días.")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Fecha inválida: {e}")
+            return
+
+        # Comprobar si el torneo ya existe en la lista
+        if any(torneo.nombre == nombreTorneo for torneo in self.torneos):
+            messagebox.showerror("Error", "Ya existe un torneo con ese nombre.")
+            return
+
+        # Crear el torneo
+        equiposParticipantes = [Equipo(equipo.get()) for equipo in equipos if equipo.get().strip()]
+        torneo = Torneo(deporte, equiposParticipantes)
+        torneo.instalacion = instalacion
+        torneo.nombre = nombreTorneo  # Establecer el nombre del torneo
+
+        # Verificar si ya existe el torneo en la lista antes de agregarlo
+        if not any(t.nombre == torneo.nombre for t in self.torneos):
+            self.torneos.append(torneo)  # Solo lo agregamos si no existe
+            self.serializarTorneos()  # Serializamos los torneos para persistirlos
+
+        # Imprimir los torneos para depuración
+        print("Lista de torneos después de agregar el nuevo torneo:")
+        for t in self.torneos:
+            print(t.nombre)
+
+        # Mostrar mensaje de éxito
+        messagebox.showinfo("Torneo Creado",
+                            f"Torneo '{nombreTorneo}' creado exitosamente con {len(equiposParticipantes)} equipos.")
+        torneoWin.destroy()  # Cerramos la ventana de creación de torneo
+
+    def editarEquipos(self):
+        # Crear una nueva ventana para editar los equipos
+        editarWin = tk.Toplevel(self)
+        editarWin.title("Editar Equipos")
+        editarWin.geometry("600x600")
+
+        # Selección de torneo (desplegable)
+        labelTorneo = tk.Label(editarWin, text="Selecciona un Torneo", font=("Arial", 12))
+        labelTorneo.pack(pady=5)
+
+        # Cargar torneos desde la lista
+        torneos = [torneo.nombre for torneo in self.torneos]
+        if not torneos:
+            messagebox.showerror("Error", "No hay torneos disponibles")
+            return
+
+        torneoSelect = tk.StringVar(editarWin)
+        torneoSelect.set(torneos[0])  # Establecer por defecto el primer torneo
+        torneoDropdown = tk.OptionMenu(editarWin, torneoSelect, *torneos)
+        torneoDropdown.pack(pady=5)
+
+        # Selección de equipo (desplegable) - Inicialmente vacío
+        labelEquipo = tk.Label(editarWin, text="Selecciona un Equipo", font=("Arial", 12))
+        labelEquipo.pack(pady=5)
+        equipoSelect = tk.StringVar(editarWin)
+        equipoDropdown = tk.OptionMenu(editarWin, equipoSelect, "")  # Vacío inicialmente
+        equipoDropdown.pack(pady=5)
+
+        # Función para actualizar los equipos después de seleccionar un torneo
+        def actualizarEquipos(*args):
+            """Actualiza los equipos basados en el torneo seleccionado."""
+            torneoSeleccionado = torneoSelect.get()
+            torneo = next(t for t in self.torneos if t.nombre == torneoSeleccionado)  # Obtener el torneo
+            equiposFiltrados = [equipo.nombreEquipo for equipo in
+                                torneo.equiposParticipantes]  # Filtrar equipos usando el atributo correcto
+            if equiposFiltrados:
+                equipoSelect.set(equiposFiltrados[0])  # Establecer el primer equipo por defecto
+                equipoDropdown['menu'].delete(0, 'end')  # Limpiar el menú de equipos
+                for equipo in equiposFiltrados:
+                    equipoDropdown['menu'].add_command(label=equipo, command=tk._setit(equipoSelect, equipo))
+            else:
+                messagebox.showerror("Error", "Este torneo no tiene equipos.")
+
+        # Llamar a la actualización de equipos cuando el torneo cambia
+        torneoSelect.trace('w', actualizarEquipos)
+
+        # Llamar a la función de actualización al iniciar para el primer torneo
+        actualizarEquipos()
+
+    def serializarTorneos(self):
+        """Serializa la lista de torneos para persistirla en un archivo."""
+        with open('torneos.pkl', 'wb') as f:
+            pickle.dump(self.torneos, f)
+
+    def cargarTorneos(self):
+        """Cargar torneos desde el archivo serializado."""
+        try:
+            with open('torneos.pkl', 'rb') as f:
+                self.torneos = pickle.load(f)
+        except FileNotFoundError:
+            self.torneos = []  # Si no hay archivo, inicializamos una lista vacía
 
     def verFixture(self):
         pass

@@ -16,6 +16,7 @@ class Torneo:
         self.reservas = []
         self.boletas = []
         self.idTorneo = len(Torneo.torneos) + 1
+        self.nombre = "Torneo"
         Torneo.torneos.append(self)
 
     @staticmethod
