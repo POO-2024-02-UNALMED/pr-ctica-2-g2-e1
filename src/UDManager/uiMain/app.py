@@ -110,10 +110,10 @@ class Application(tk.Tk):
     def acercaDe(self):
         # Muestra los nombres de los desarrolladores
         devs = ("Los desarrolladores de este programa son:\n\n"
-            "Fabián Andrés Hurtado Arango\n"
-            "Christian Bustos Betancur\n"
-            "José Mauricio Toscano Aguas\n"
-            "Jesús Daniel Pérez Petro")
+                "Fabián Andrés Hurtado Arango\n"
+                "Christian Bustos Betancur\n"
+                "José Mauricio Toscano Aguas\n"
+                "Jesús Daniel Pérez Petro")
 
         messagebox.showinfo("Acerca de", devs)
 
@@ -155,7 +155,8 @@ class Application(tk.Tk):
                     edad = 0
                 # El cliente se crea y se guarda en la lista global automáticamente
                 nuevoCliente = Cliente(nombre=nombre, apellido=apellido, edad=edad)
-                messagebox.showinfo("Exito", f"Cliente '{nuevoCliente.getNombreCompleto()}' creado con ID {nuevoCliente.ID}.")
+                messagebox.showinfo("Exito",
+                                    f"Cliente '{nuevoCliente.getNombreCompleto()}' creado con ID {nuevoCliente.ID}.")
                 for crit in criteria:
                     fieldFrame.setValue(crit, "")
 
@@ -249,7 +250,8 @@ class Application(tk.Tk):
 
         tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
         tk.Button(btnFrameEdit, text="Eliminar Cliente", command=eliminarCliente).pack(side="left", padx=5)
-#...
+
+    # ...
     def mostrarInstalaciones(self):
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
@@ -362,7 +364,8 @@ class Application(tk.Tk):
 
         tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
         tk.Button(btnFrameEdit, text="Eliminar Instalación", command=eliminarInstalacion).pack(side="left", padx=5)
-#...........
+
+    # ...........
 
     def verReservas(self):
         if not Reserva.listaReservas:
@@ -449,7 +452,8 @@ class Application(tk.Tk):
 
         tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
         tk.Button(btnFrameEdit, text="Eliminar Reserva", command=eliminarReserva).pack(side="left", padx=5)
-####
+
+    ####
     def mostrarReservas(self):
         # Limpia la zona de contenido
         for widget in self.contentFrame.winfo_children():
@@ -533,13 +537,19 @@ class Application(tk.Tk):
         tk.Button(self.contentFrame, text="Crear Torneo", command=self.crearTorneo).pack(pady=10)
         tk.Button(self.contentFrame, text="Ver Fixture", command=self.verFixture).pack(pady=10)
         tk.Button(self.contentFrame, text="Ver Equipos", command=self.verEquiposTorneo).pack(pady=10)
-        tk.Button(self.contentFrame, text= "Editar Equipos", command=self.editarEquipos).pack(pady=5)
+        tk.Button(self.contentFrame, text="Editar Equipos", command=self.editarEquipos).pack(pady=5)
 
     def crearReserva(self):
-        print("El método crearReserva ha sido llamado.")  # Confirmamos la ejecución del método
-        self.clienteSeleccionado = next(cliente for cliente in self.clientes if
-                                        f"{cliente.ID} - {cliente.getNombreCompleto()}" == self.clienteSelect.get())
-        self.fechaSeleccionada = self.calendario.get_date()  # Obtener la fecha del calendario (en formato string)
+        # Obtener la fecha desde el campo de texto
+        fechaSeleccionada = self.fechaEntrada.get().strip()  # Obtener la fecha desde el campo de entrada
+
+        # Validar el formato de la fecha (MM/DD/YY)
+        try:
+            fechaReserva = datetime.strptime(fechaSeleccionada, "%m/%d/%y")  # Convertimos la fecha
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha incorrecto. Use MM/DD/YY.")
+            return
+
         self.horaInicio = self.horaInicioEntry.get().strip()  # Eliminar espacios antes y después
         self.horaFin = self.horaFinEntry.get().strip()  # Eliminar espacios antes y después
         self.instalacionSeleccionada = next(
@@ -564,15 +574,8 @@ class Application(tk.Tk):
             return
 
         try:
-            # Convertir la fecha seleccionada y las horas a formato datetime
-            print(
-                f"Fecha seleccionada: {self.fechaSeleccionada} | Hora inicio: {self.horaInicio} | Hora fin: {self.horaFin}")
-
-            fechaReserva = datetime.strptime(f"{self.fechaSeleccionada} {self.horaInicio}", "%m/%d/%y %H:%M")
-            self.horaFin = datetime.strptime(f"{self.fechaSeleccionada} {self.horaFin}", "%m/%d/%y %H:%M")
-
-            # Verificar las fechas convertidas
-            print(f"Fecha de reserva: {fechaReserva} | Hora fin: {self.horaFin}")
+            fechaReserva = datetime.strptime(f"{fechaSeleccionada} {self.horaInicio}", "%m/%d/%y %H:%M")
+            self.horaFin = datetime.strptime(f"{fechaSeleccionada} {self.horaFin}", "%m/%d/%y %H:%M")
 
             # Validar horas
             if fechaReserva >= self.horaFin:
@@ -619,50 +622,125 @@ class Application(tk.Tk):
         return False
 
     def mostrarMenuCreacionReserva(self):
-        # Crear una nueva ventana de creación de reserva
         self.menuWin = tk.Toplevel(self)
         self.menuWin.title("Crear Reserva")
         self.menuWin.geometry("700x700")
 
-        # Campo para seleccionar cliente
         labelCliente = tk.Label(self.menuWin, text="Selecciona un Cliente", font=("Arial", 12))
         labelCliente.pack(pady=5)
         clientes = [f"{cliente.ID} - {cliente.getNombreCompleto()}" for cliente in self.clientes]
         self.clienteSelect = tk.StringVar(self.menuWin)
-        self.clienteSelect.set(clientes[0])  # Establecer por defecto el primer cliente
+        self.clienteSelect.set(clientes[0])
         clienteDropdown = tk.OptionMenu(self.menuWin, self.clienteSelect, *clientes)
         clienteDropdown.pack(pady=5)
 
-        # Campo para seleccionar la fecha de la reserva usando un calendario
-        labelFecha = tk.Label(self.menuWin, text="Selecciona una fecha", font=("Arial", 12))
-        labelFecha.pack(pady=5)
-        from tkcalendar import Calendar
-        self.calendario = Calendar(self.menuWin)
-        self.calendario.pack(pady=5)
+        # Al seleccionar un cliente, lo asignamos a clienteSeleccionado
+        self.clienteSeleccionado = None
+        self.clienteSelect.trace_add("write", self.seleccionarCliente)
 
-        # Campos para seleccionar horas de inicio y fin de la reserva
+        labelFecha = tk.Label(self.menuWin, text="Selecciona una fecha (MM/DD/YY)", font=("Arial", 12))
+        labelFecha.pack(pady=5)
+        self.fechaEntrada = tk.Entry(self.menuWin)
+        self.fechaEntrada.insert(0, "MM/DD/YY")  # Texto por defecto
+        self.fechaEntrada.pack(pady=5)
+
         labelHoraInicio = tk.Label(self.menuWin, text="Hora de Inicio (HH:MM)", font=("Arial", 12))
         labelHoraInicio.pack(pady=5)
-        self.horaInicioEntry = tk.Entry(self.menuWin)  # Asignar a self
+        self.horaInicioEntry = tk.Entry(self.menuWin)
         self.horaInicioEntry.pack(pady=5)
 
         labelHoraFin = tk.Label(self.menuWin, text="Hora de Fin (HH:MM)", font=("Arial", 12))
         labelHoraFin.pack(pady=5)
-        self.horaFinEntry = tk.Entry(self.menuWin)  # Asignar a self
+        self.horaFinEntry = tk.Entry(self.menuWin)
         self.horaFinEntry.pack(pady=5)
 
-        # Campo para seleccionar instalación
         labelInstalacion = tk.Label(self.menuWin, text="Selecciona una Instalación", font=("Arial", 12))
         labelInstalacion.pack(pady=5)
         instalaciones = [f"{inst.nombre}" for inst in self.instalaciones]
         self.instalacionSelect = tk.StringVar(self.menuWin)
-        self.instalacionSelect.set(instalaciones[0])  # Establecer por defecto la primera instalación
+        self.instalacionSelect.set(instalaciones[0])
         instalacionDropdown = tk.OptionMenu(self.menuWin, self.instalacionSelect, *instalaciones)
         instalacionDropdown.pack(pady=5)
 
-        # Botón para confirmar la reserva
         confirmarReservaBtn = tk.Button(self.menuWin, text="Aceptar", command=self.crearReserva)
         confirmarReservaBtn.pack(pady=20)
+
+    def seleccionarCliente(self, *args):
+        clienteSeleccionadoStr = self.clienteSelect.get()
+        clienteID = clienteSeleccionadoStr.split(" - ")[0]
+        self.clienteSeleccionado = next(cliente for cliente in self.clientes if str(cliente.ID) == clienteID)
+        print(f"Cliente seleccionado: {self.clienteSeleccionado.getNombreCompleto()}")
+
+    def crearReserva(self):
+        fechaSeleccionada = self.fechaEntrada.get().strip()  # Obtener la fecha desde el campo de entrada
+
+        # Validar el formato de la fecha (MM/DD/YY)
+        try:
+            fechaReserva = datetime.strptime(fechaSeleccionada, "%m/%d/%y")  # Convertimos la fecha
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha incorrecto. Use MM/DD/YY.")
+            return
+
+        self.horaInicio = self.horaInicioEntry.get().strip()  # Eliminar espacios antes y después
+        self.horaFin = self.horaFinEntry.get().strip()  # Eliminar espacios antes y después
+        self.instalacionSeleccionada = next(
+            inst for inst in self.instalaciones if inst.nombre == self.instalacionSelect.get())
+
+        # Validar el formato de las horas (HH:MM)
+        if len(self.horaInicio) != 5 or len(self.horaFin) != 5:
+            messagebox.showerror("Error", "El formato de la hora debe ser HH:MM.")
+            return
+
+        if self.horaInicio[2] != ':' or self.horaFin[2] != ':':
+            messagebox.showerror("Error", "El formato de la hora debe ser HH:MM.")
+            return
+
+        # Verificar que las horas y minutos sean numéricos
+        horaInicioPartes = self.horaInicio.split(':')
+        horaFinPartes = self.horaFin.split(':')
+
+        if not (horaInicioPartes[0].isdigit() and horaInicioPartes[1].isdigit() and
+                horaFinPartes[0].isdigit() and horaFinPartes[1].isdigit()):
+            messagebox.showerror("Error", "La hora y los minutos deben ser números.")
+            return
+
+        try:
+            fechaReserva = datetime.strptime(f"{fechaSeleccionada} {self.horaInicio}", "%m/%d/%y %H:%M")
+            self.horaFin = datetime.strptime(f"{fechaSeleccionada} {self.horaFin}", "%m/%d/%y %H:%M")
+
+            # Validar horas
+            if fechaReserva >= self.horaFin:
+                messagebox.showerror("Error", "La hora de inicio debe ser antes que la hora de fin.")
+                return
+
+            # Comprobar si la reserva es duplicada
+            if self.esReservaDuplicada(self.instalacionSeleccionada, fechaReserva, self.horaFin):
+                messagebox.showerror("Error", "Ya existe una reserva en este horario para esta instalación.")
+                return
+
+            # Crear la instancia de FechaReserva
+            fechaReservaObj = FechaReserva(fechaReserva, self.horaFin)
+
+            # Calcular el monto a pagar
+            duracion = (self.horaFin - fechaReserva).seconds / 3600  # Duración en horas
+            precioReserva = self.instalacionSeleccionada.precioHora * duracion
+
+            # Crear la reserva y asignar un ID de pago único
+            nuevaReserva = Reserva(self.clienteSeleccionado, self.instalacionSeleccionada, fechaReservaObj,
+                                   precioReserva)
+            messagebox.showinfo("Reserva creada",
+                                f"Reserva con ID {nuevaReserva.ID} y ID de pago {nuevaReserva.ID_pago} creada exitosamente.")
+
+            # Serializar la reserva después de crearla
+            Serializador.serializar()
+
+            self.menuWin.destroy()  # Cerrar la ventana de reserva
+            self.mostrarReservas()  # Actualizar la vista de reservas
+
+        except ValueError as e:
+            print(f"Error: {e}")  # Muestra el error para depuración
+            messagebox.showerror("Error", "Formato de hora incorrecto.")
+
     def editarReservas(self):
         editWin = tk.Toplevel(self)
         editWin.title("Editar Reservas")
@@ -810,30 +888,28 @@ class Application(tk.Tk):
             equipoEntry.pack(pady=5)
             equipos.append(equipoEntry)
 
-        # Fechas de inicio y fin con calendarios
-        labelFechaInicio = tk.Label(torneoWin, text="Fecha de Inicio", font=("Arial", 12))
+        # Fechas de inicio y fin con campos de texto
+        labelFechaInicio = tk.Label(torneoWin, text="Fecha de Inicio (MM/DD/YY)", font=("Arial", 12))
         labelFechaInicio.pack(pady=5)
+        fechaInicioEntry = tk.Entry(torneoWin)
+        fechaInicioEntry.insert(0, "MM/DD/YY")  # Texto por defecto
+        fechaInicioEntry.pack(pady=5)
 
-        # Usamos el calendario para la fecha de inicio
-        calendarioInicio = Calendar(torneoWin, selectmode="day", date_pattern="yyyy-mm-dd")
-        calendarioInicio.pack(pady=5, side="left", padx=5)
-
-        labelFechaFin = tk.Label(torneoWin, text="Fecha de Fin", font=("Arial", 12))
+        labelFechaFin = tk.Label(torneoWin, text="Fecha de Fin (MM/DD/YY)", font=("Arial", 12))
         labelFechaFin.pack(pady=5)
-
-        # Usamos el calendario para la fecha de fin
-        calendarioFin = Calendar(torneoWin, selectmode="day", date_pattern="yyyy-mm-dd")
-        calendarioFin.pack(pady=5, side="left", padx=5)
+        fechaFinEntry = tk.Entry(torneoWin)
+        fechaFinEntry.insert(0, "MM/DD/YY")  # Texto por defecto
+        fechaFinEntry.pack(pady=5)
 
         # Botón Aceptar
         aceptarBtn = tk.Button(torneoWin, text="Aceptar",
                                command=lambda: self.onAceptar(clienteSelect, nombreTorneoEntry, deporteSelect,
-                                                              instalacionSelect, calendarioInicio, calendarioFin,
-                                                              equipos,torneoWin))
+                                                              instalacionSelect, fechaInicioEntry, fechaFinEntry,
+                                                              equipos, torneoWin))
         aceptarBtn.pack(pady=20)
 
-    def onAceptar(self, clienteSelect, nombreTorneoEntry, deporteSelect, instalacionSelect, calendarioInicio,
-                  calendarioFin, equipos, torneoWin):
+    def onAceptar(self, clienteSelect, nombreTorneoEntry, deporteSelect, instalacionSelect, fechaInicioEntry,
+                  fechaFinEntry, equipos, torneoWin):
         clienteSeleccionado = next(cliente for cliente in self.clientes if
                                    f"{cliente.ID} - {cliente.getNombreCompleto()}" == clienteSelect.get())
         nombreTorneo = nombreTorneoEntry.get()
@@ -848,8 +924,8 @@ class Application(tk.Tk):
 
         # Validar fechas
         try:
-            fechaInicio = datetime.strptime(calendarioInicio.get_date(), "%Y-%m-%d")
-            fechaFin = datetime.strptime(calendarioFin.get_date(), "%Y-%m-%d")
+            fechaInicio = datetime.strptime(fechaInicioEntry.get(), "%m/%d/%y")
+            fechaFin = datetime.strptime(fechaFinEntry.get(), "%m/%d/%y")
             if (fechaFin - fechaInicio).days < 3:
                 raise ValueError("La duración del torneo debe ser de al menos 3 días.")
         except ValueError as e:
@@ -863,7 +939,7 @@ class Application(tk.Tk):
 
         # Crear el torneo
         equiposParticipantes = [Equipo(equipo.get()) for equipo in equipos if equipo.get().strip()]
-        torneo = Torneo(deporte, equiposParticipantes)
+        torneo = Torneo(deporte, equiposParticipantes, fechaInicio, fechaFin)
         torneo.instalacion = instalacion
         torneo.nombre = nombreTorneo  # Establecer el nombre del torneo
 
@@ -993,8 +1069,9 @@ class Application(tk.Tk):
 
     def pagarTorneo(self):
         pass
-###FORMATIVO
-    
+
+    ###FORMATIVO
+
     def UltimoDiaDelMes(self, fecha):
         if fecha.month == 12:
             return 31
@@ -1025,7 +1102,7 @@ class Application(tk.Tk):
             "Viernes 14-16": [4]
         }
 
-        #FieldFrame para los campos de texto
+        # FieldFrame para los campos de texto
         fieldFrame = FieldFrame(formFrame, "Campo", criteria, "Valor")
         fieldFrame.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -1102,7 +1179,7 @@ class Application(tk.Tk):
             inscripcionWindow.destroy()
             return
 
-        #creacion de listas paralelas para OptionMenu
+        # creacion de listas paralelas para OptionMenu
         self.jovenesLabels = [f"{j.getNombreCompleto()} (ID: {j.id})" for j in jovenesNoInscritos]
         self.jovenesRefs = jovenesNoInscritos
 
@@ -1159,8 +1236,7 @@ class Application(tk.Tk):
         else:
             messagebox.showinfo("Inscripciones", "No hay jóvenes registrados.")
 
-
-#-------
+    # -------
 
     def salir(self):
         from src.UDManager.baseDatos.serializador import Serializador
@@ -1175,6 +1251,7 @@ class Application(tk.Tk):
         from src.UDManager.uiMain.app import Application
         app = Application()
         app.mainloop()
+
 
 if __name__ == "__main__":
     app = Application()
