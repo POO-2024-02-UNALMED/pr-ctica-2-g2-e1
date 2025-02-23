@@ -999,6 +999,7 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
+                  command=self.pagarReserva,
                   overrelief="solid").pack(pady=15)
 
         self.labelImg1 = tk.Label(self.contentFrame,image=self.img_pagos1, bg="white")
