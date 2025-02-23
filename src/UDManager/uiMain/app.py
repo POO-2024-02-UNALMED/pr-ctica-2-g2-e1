@@ -1205,7 +1205,6 @@ class Application(tk.Tk):
                                     f"Joven {joven.getNombreCompleto()} formalizado.\n"
                                     f"Tarifa base: {joven.baseInscripcion}.\n"
                                     f"Valor actual de inscripción (base + compras): {joven.baseInscripcion + joven.totalCompras}.")
-                joven.inscripcionPagada = True
                 from src.UDManager.baseDatos.serializador import Serializador
                 Serializador.serializar()
                 inscripcionWindow.destroy()
@@ -1266,7 +1265,7 @@ class Application(tk.Tk):
             listaBox.pack(padx=10, pady=10, fill="both", expand=True)
 
             for j in Joven.listaJovenes:
-                estado = "Inscrito" if j.inscripcionPagada else "No Inscrito"
+                estado = "Inscripción Pagada" if j.inscripcionPagada else "Inscripción no Pagada"
                 fechasStr = ", ".join(j.fechas) if hasattr(j, "fechas") and j.fechas else "Sin fechas"
                 inscripcionValor = f"${j.baseInscripcion + j.totalCompras}" if hasattr(j,
                                                                                        "baseInscripcion") else "No calculado"
