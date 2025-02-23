@@ -10,6 +10,8 @@ from tkcalendar import Calendar
 from src.UDManager.baseDatos.serializador import Serializador
 from src.UDManager.gestorAplicacion.eventos.evento import Evento
 from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
+from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
+from src.UDManager.gestorAplicacion.inscripcion.articuloTiendaEscuela import ArticuloTiendaEscuela
 from src.UDManager.gestorAplicacion.reservas.fechaReserva import FechaReserva
 from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
 from src.UDManager.gestorAplicacion.reservas.reserva import Reserva
@@ -17,12 +19,11 @@ from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
 from src.UDManager.gestorAplicacion.pagos.boleta import Boleta
 from src.UDManager.gestorAplicacion.torneo.equipo import Equipo
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
-from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
 
 # Importa la clase FieldFrame desde su archivo
 from src.UDManager.uiMain.fieldFrame import FieldFrame
 
-TiendaEscuela = TiendaEscuela()
+TiendaEscuelaFormativo = TiendaEscuela()
 
 
 class Application(tk.Tk):
@@ -37,6 +38,9 @@ class Application(tk.Tk):
         self.horaFinEntry = None
         self.instalacionSelect = None
         self.menuWin = None
+
+        # Creación de la tienda para Deporte Formativo.
+        self.crearTienda()
 
         # Cargar base de datos (usando pickle en BaseDatos)
         from src.UDManager.baseDatos.deserializador import Deserializador
@@ -993,174 +997,367 @@ class Application(tk.Tk):
 
     def pagarTorneo(self):
         pass
+
 ###FORMATIVO
-    
+
+    def crearTienda(self):
+            """Crea la tienda y precarga 5 artículos por cada deporte."""
+            self.tiendaEscuela = TiendaEscuela()
+            # Artículos para Fútbol
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(1, "Balón de Fútbol", 10, 15000, "Fútbol"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(2, "Camiseta de Fútbol", 5, 18000, "Fútbol"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(3, "Botines de Fútbol", 8, 25000, "Fútbol"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(4, "Medias de Fútbol", 15, 12000, "Fútbol"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(5, "Guantes de Portero", 3, 30000, "Fútbol"))
+            # Artículos para Baloncesto
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(6, "Balón de Baloncesto", 10, 16000, "Baloncesto"))
+            self.tiendaEscuela.agregarArticulo(
+                ArticuloTiendaEscuela(7, "Camiseta de Baloncesto", 5, 19000, "Baloncesto"))
+            self.tiendaEscuela.agregarArticulo(
+                ArticuloTiendaEscuela(8, "Zapatillas de Baloncesto", 8, 28000, "Baloncesto"))
+            self.tiendaEscuela.agregarArticulo(
+                ArticuloTiendaEscuela(9, "Pantalones Deportivos", 12, 13000, "Baloncesto"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(10, "Muñequeras", 20, 11000, "Baloncesto"))
+            # Artículos para Natación
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(11, "Gorro de Natación", 15, 10000, "Natación"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(12, "Gafas de Natación", 10, 20000, "Natación"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(13, "Traje de Baño", 7, 25000, "Natación"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(14, "Flotador", 12, 12000, "Natación"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(15, "Toalla Deportiva", 20, 15000, "Natación"))
+            # Artículos para Tenis
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(16, "Raqueta de Tenis", 6, 30000, "Tenis"))
+            self.tiendaEscuela.agregarArticulo(
+                ArticuloTiendaEscuela(17, "Pelotas de Tenis (Paquete)", 10, 17000, "Tenis"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(18, "Camiseta de Tenis", 8, 20000, "Tenis"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(19, "Pantalón Corto", 12, 14000, "Tenis"))
+            self.tiendaEscuela.agregarArticulo(ArticuloTiendaEscuela(20, "Muñequeras de Tenis", 20, 11000, "Tenis"))
+
     def UltimoDiaDelMes(self, fecha):
-        if fecha.month == 12:
-            return 31
-        proximoMes = fecha.replace(month=fecha.month + 1, day=1)
-        return (proximoMes - timedelta(days=1)).day
+            if fecha.month == 12:
+                return 31
+            proximoMes = fecha.replace(month=fecha.month + 1, day=1)
+            return (proximoMes - timedelta(days=1)).day
 
     def mostrarFormativo(self):
-        # Limpia el contentFrame
-        for widget in self.contentFrame.winfo_children():
-            widget.destroy()
+            """Pantalla inicial de Deporte Formativo con dos opciones:
+               1. Inscribir Joven.
+               2. Seleccionar Joven para Tienda."""
+            for widget in self.contentFrame.winfo_children():
+                widget.destroy()
 
-        title = tk.Label(self.contentFrame, text="Área Formativa", font=("Arial", 18), bg="white")
-        title.pack(pady=10)
+            title = tk.Label(self.contentFrame, text="Deporte Formativo", font=("Arial", 20), bg="white")
+            title.pack(pady=20)
 
-        formFrame = tk.Frame(self.contentFrame, bg="white")
-        formFrame.pack(pady=10, fill="x")
+            # --- FRAME CON LA IMAGEN Y EL ÚLTIMO JOVEN INSCRITO (CENTRADO) ---
+            infoFrame = tk.Frame(self.contentFrame, bg="white")
+            infoFrame.pack(pady=10, fill="x")  # Lo colocamos arriba, antes de los botones
 
-        # Campos que pedimos al usuario
-        criteria = ["nombre", "apellido", "edad", "experienciaJoven", "eps",
-                    "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]
+            # Cargar la imagen "image4.png"
+            try:
+                self.imagen = tk.PhotoImage(file="image4.png")
+                # Creamos un label para la imagen y lo centramos con pack
+                tk.Label(infoFrame, image=self.imagen, bg="white").pack(pady=5)
+            except Exception as e:
+                tk.Label(infoFrame, text="(No se pudo cargar la imagen)", bg="white").pack(pady=5)
 
-        # Definimos los horarios disponibles (diasemana: 0 = lunes, 6 = domingo)
-        self.horariosDisponibles = {
-            "Lunes-Miércoles 8-10": [0, 2],
-            "Lunes-Miércoles 10-12": [0, 2],
-            "Martes-Jueves 8-10": [1, 3],
-            "Martes-Jueves 10-12": [1, 3],
-            "Viernes 14-16": [4]
-        }
+            # Buscar el último joven inscrito (que tenga asignado un horario)
+            last_inscrito = None
+            for j in Joven.listaJovenes:
+                if j.horario:
+                    last_inscrito = j
 
-        #FieldFrame para los campos de texto
-        fieldFrame = FieldFrame(formFrame, "Campo", criteria, "Valor")
-        fieldFrame.pack(fill="both", expand=True, padx=10, pady=10)
+            if last_inscrito:
+                info_text = f"Último Joven Inscrito: {last_inscrito.getNombreCompleto()} - Horario: {last_inscrito.horario}"
+            else:
+                info_text = "No hay jóvenes inscritos."
 
-        # OptionMenu para "deporte"
-        tk.Label(formFrame, text="Deporte:", font=("Arial", 12), bg="white").pack(pady=5)
-        deportes = ["Fútbol", "Baloncesto", "Natación", "Tenis"]
-        self.deporteVar = tk.StringVar()
-        self.deporteVar.set(deportes[0])  # Valor inicial
-        opMenuDeporte = tk.OptionMenu(formFrame, self.deporteVar, *deportes)
-        opMenuDeporte.pack()
+            tk.Label(infoFrame, text=info_text, font=("Arial", 12), bg="white").pack(pady=5)
 
-        btnFrame = tk.Frame(formFrame, bg="white")
-        btnFrame.pack(side="bottom", pady=10)
+            # --- FRAME DE BOTONES ---
+            btnFrame = tk.Frame(self.contentFrame, bg="white")
+            btnFrame.pack(pady=20)  # Esto quedará debajo de infoFrame
 
-        tk.Button(btnFrame, text="Crear Joven", command=lambda: self.crearJoven(fieldFrame)).pack(side="left", padx=5)
-        tk.Button(btnFrame, text="Inscribir Joven", command=self.inscribirJoven).pack(side="left", padx=5)
-        tk.Button(btnFrame, text="Ver Jovenes", command=self.mostrarInscripciones).pack(side="left", padx=5)
-
-    def crearJoven(self, fieldFrame):
-        # Obtenemos los valores del FieldFrame (sin "deporte")
-        valores = [fieldFrame.getValue(c).strip() for c in
-                   ["nombre", "apellido", "edad", "experienciaJoven", "eps",
-                    "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]]
-
-        # Verificamos campos vacíos
-        if "" in valores:
-            messagebox.showwarning("Campos Incompletos", "Todos los campos son obligatorios.")
-            return
-
-        # Convertimos a int los campos "edad" y "experienciaJoven"
-        try:
-            edad = int(valores[2])
-            experiencia = int(valores[3])
-        except ValueError:
-            messagebox.showerror("Error", "Edad y Experiencia deben ser números.")
-            return
-
-        # Obtenemos el deporte seleccionado en el OptionMenu
-        deporteSeleccionado = self.deporteVar.get()
-
-        # Calculamos un nuevo ID
-        nuevoId = max([int(j.id) for j in Joven.listaJovenes if isinstance(j.id, int)], default=0) + 1
-
-        # Creamos el objeto Joven
-        nuevoJoven = Joven(
-            valores[0],  # nombre
-            valores[1],  # apellido
-            nuevoId,
-            edad,
-            experiencia,
-            valores[4],  # eps
-            valores[5],  # nombreAcudiente
-            valores[6],  # telefonoAcudiente
-            valores[7]  # cedulaAcudiente
-        )
-        # Asignamos el deporte que viene del OptionMenu
-        nuevoJoven.deporte = deporteSeleccionado
-
-        messagebox.showinfo("Éxito",
-                            f"Joven {nuevoJoven.getNombreCompleto()} creado correctamente con ID {nuevoJoven.id}. "
-                            "Ahora puede inscribirlo en un horario.")
+            tk.Button(btnFrame, text="Inscribir Joven", font=("Arial", 14),
+                      command=self.inscribirJoven).pack(side="left", padx=20)
+            tk.Button(btnFrame, text="Seleccionar Joven para Tienda", font=("Arial", 14),
+                      command=self.seleccionarJovenParaTienda).pack(side="left", padx=20)
 
     def inscribirJoven(self):
-        # Ventana emergente para inscribir
-        inscripcionWindow = tk.Toplevel(self.contentFrame)
-        inscripcionWindow.title("Inscribir Joven")
+            """Interfaz para inscribir un joven. Se recogen los datos mediante un FieldFrame,
+               se selecciona el deporte y se asigna un horario, generando las fechas.
+               Luego, se formaliza la inscripción (aún sin pago) mediante el método Formalizar."""
+            for widget in self.contentFrame.winfo_children():
+                widget.destroy()
 
-        tk.Label(inscripcionWindow, text="Seleccione un Joven", font=("Arial", 12)).pack(pady=5)
+            title = tk.Label(self.contentFrame, text="Área Formativa", font=("Arial", 18), bg="white")
+            title.pack(pady=10)
 
-        # Construccion de  la lista de jóvenes no inscritos
-        jovenesNoInscritos = [j for j in Joven.listaJovenes if not j.inscripcionPagada]
-        if not jovenesNoInscritos:
-            messagebox.showinfo("Aviso", "No hay jóvenes disponibles para inscripción.")
-            inscripcionWindow.destroy()
-            return
+            formFrame = tk.Frame(self.contentFrame, bg="white")
+            formFrame.pack(pady=10, fill="x")
 
-        #creacion de listas paralelas para OptionMenu
-        self.jovenesLabels = [f"{j.getNombreCompleto()} (ID: {j.id})" for j in jovenesNoInscritos]
-        self.jovenesRefs = jovenesNoInscritos
+            criteria = ["nombre", "apellido", "edad", "experienciaJoven", "eps",
+                        "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]
+            self.horariosDisponibles = {
+                "Lunes-Miércoles 8-10": [0, 2],
+                "Lunes-Miércoles 10-12": [0, 2],
+                "Martes-Jueves 8-10": [1, 3],
+                "Martes-Jueves 10-12": [1, 3],
+                "Viernes 14-16": [4]
+            }
+            fieldFrame = FieldFrame(formFrame, "Campo", criteria, "Valor")
+            fieldFrame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        jovenVar = tk.StringVar()
-        jovenVar.set(self.jovenesLabels[0])  # Primera opción por defecto
-        jovenMenu = tk.OptionMenu(inscripcionWindow, jovenVar, *self.jovenesLabels)
-        jovenMenu.pack()
+            tk.Label(formFrame, text="Deporte:", font=("Arial", 12), bg="white").pack(pady=5)
+            deportes = ["Fútbol", "Baloncesto", "Natación", "Tenis"]
+            self.deporteVar = tk.StringVar()
+            self.deporteVar.set(deportes[0])
+            opMenuDeporte = tk.OptionMenu(formFrame, self.deporteVar, *deportes)
+            opMenuDeporte.pack()
 
-        tk.Label(inscripcionWindow, text="Seleccione un Horario", font=("Arial", 12)).pack(pady=5)
-        horarioVar = tk.StringVar()
-        horarioVar.set(list(self.horariosDisponibles.keys())[0])
-        horarioMenu = tk.OptionMenu(inscripcionWindow, horarioVar, *self.horariosDisponibles.keys())
-        horarioMenu.pack()
+            btnFrame = tk.Frame(formFrame, bg="white")
+            btnFrame.pack(side="bottom", pady=10)
 
-        def confirmar():
-            etiquetaSeleccionada = jovenVar.get()
-            indice = self.jovenesLabels.index(etiquetaSeleccionada)
-            joven = self.jovenesRefs[indice]
+            tk.Button(btnFrame, text="Crear Joven", command=lambda: self.crearJoven(fieldFrame)).pack(side="left",
+                                                                                                      padx=5)
+            tk.Button(btnFrame, text="Mostrar Jóvenes", command=self.mostrarInscripciones).pack(side="left", padx=5)
+            tk.Button(btnFrame, text="Formalizar Inscripción", command=self.Formalizar).pack(side="left", padx=5)
+            tk.Button(btnFrame, text="Borrar Joven", command=self.borrarJoven).pack(side="left", padx=5)
+            tk.Button(btnFrame, text="Volver", command=self.mostrarFormativo).pack(side="left", padx=5)
 
-            joven.inscripcionPagada = True
-            joven.horario = horarioVar.get()
+    def borrarJoven(self):
+            """Abre una ventana para borrar un joven seleccionado de la lista global."""
+            borrarWin = tk.Toplevel(self.contentFrame)
+            borrarWin.title("Borrar Jóvenes")
 
-            diasValidos = self.horariosDisponibles[joven.horario]
-            fechas = []
-            hoy = datetime.today()
-            ultimoDiaMes = self.UltimoDiaDelMes(hoy)
+            tk.Label(borrarWin, text="Seleccione un Joven para borrar:", font=("Arial", 12)).pack(pady=5)
 
-            for dia in range(1, ultimoDiaMes + 1):
-                fecha = hoy.replace(day=dia)
-                if fecha.weekday() in diasValidos:
-                    fechas.append(fecha.strftime("%d/%m/%y"))
+            listaBox = tk.Listbox(borrarWin, width=100, height=20)
+            listaBox.pack(padx=10, pady=10, fill="both", expand=True)
 
-            joven.fechas = fechas
+            for j in Joven.listaJovenes:
+                listaBox.insert(tk.END, f"{j.getNombreCompleto()} (ID: {j.id})")
 
-            messagebox.showinfo("Inscripción Exitosa",
-                                f"Joven {joven.getNombreCompleto()} inscrito en {joven.deporte} "
-                                f"en las fechas {', '.join(fechas)} en el horario {joven.horario}.")
+            def borrarSeleccionado():
+                selected = listaBox.curselection()
+                if not selected:
+                    messagebox.showwarning("Borrar", "Seleccione un joven para borrar.")
+                    return
+                index = selected[0]
+                confirm = messagebox.askyesno("Confirmar", "¿Está seguro de borrar el joven seleccionado?")
+                if confirm:
+                    del Joven.listaJovenes[index]
+                    listaBox.delete(index)
+                    messagebox.showinfo("Borrar", "Joven borrado correctamente.")
 
-            from src.UDManager.baseDatos.serializador import Serializador
-            Serializador.serializar()
-            inscripcionWindow.destroy()
+            tk.Button(borrarWin, text="Borrar", command=borrarSeleccionado).pack(pady=5)
+            tk.Button(borrarWin, text="Cerrar", command=borrarWin.destroy).pack(pady=5)
 
-        tk.Button(inscripcionWindow, text="Inscribir", command=confirmar).pack(pady=10)
+    def Formalizar(self):
+            """Formaliza la inscripción de un joven:
+               - Se selecciona un joven sin inscripción formal (no pagada).
+               - Se asigna un horario y se generan las fechas.
+               - Se asigna la tarifa base (según experiencia) a baseInscripcion.
+               - El valor total de inscripción es: baseInscripcion + totalCompras.
+               inscripcionPagada permanece False (pendiente de pago)."""
+            inscripcionWindow = tk.Toplevel(self.contentFrame)
+            inscripcionWindow.title("Formalizar inscripción de Joven")
+
+            tk.Label(inscripcionWindow, text="Seleccione un Joven", font=("Arial", 12)).pack(pady=5)
+
+            jovenesNoFormales = [j for j in Joven.listaJovenes if not j.inscripcionPagada]
+            if not jovenesNoFormales:
+                messagebox.showinfo("Aviso", "No hay jóvenes disponibles para formalización.")
+                inscripcionWindow.destroy()
+                return
+
+            self.jovenesLabels = [f"{j.getNombreCompleto()} (ID: {j.id})" for j in jovenesNoFormales]
+            self.jovenesRefs = jovenesNoFormales
+
+            jovenVar = tk.StringVar()
+            jovenVar.set(self.jovenesLabels[0])
+            tk.OptionMenu(inscripcionWindow, jovenVar, *self.jovenesLabels).pack()
+
+            tk.Label(inscripcionWindow, text="Seleccione un Horario", font=("Arial", 12)).pack(pady=5)
+            horarioVar = tk.StringVar()
+            horarioVar.set(list(self.horariosDisponibles.keys())[0])
+            tk.OptionMenu(inscripcionWindow, horarioVar, *self.horariosDisponibles.keys()).pack()
+
+            def confirmar():
+                etiquetaSeleccionada = jovenVar.get()
+                indice = self.jovenesLabels.index(etiquetaSeleccionada)
+                joven = self.jovenesRefs[indice]
+
+                joven.horario = horarioVar.get()
+                diasValidos = self.horariosDisponibles[joven.horario]
+                fechas = []
+                hoy = datetime.today()
+                ultimoDiaMes = self.UltimoDiaDelMes(hoy)
+                for dia in range(1, ultimoDiaMes + 1):
+                    fecha = hoy.replace(day=dia)
+                    if fecha.weekday() in diasValidos:
+                        fechas.append(fecha.strftime("%d/%m/%y"))
+                joven.fechas = fechas
+
+                # Asigna la tarifa base según la experiencia (una sola vez)
+                self.asignarBaseInscripcion(joven)
+
+                messagebox.showinfo("Inscripción Registrada",
+                                    f"Joven {joven.getNombreCompleto()} formalizado.\n"
+                                    f"Tarifa base: {joven.baseInscripcion}.\n"
+                                    f"Valor actual de inscripción (base + compras): {joven.baseInscripcion + joven.totalCompras}.")
+                joven.inscripcionPagada = True
+                from src.UDManager.baseDatos.serializador import Serializador
+                Serializador.serializar()
+                inscripcionWindow.destroy()
+
+            tk.Button(inscripcionWindow, text="Inscribir", command=confirmar).pack(pady=10)
+
+    def asignarBaseInscripcion(self, joven):
+            """Asigna la tarifa base al joven según su experiencia, y la guarda en baseInscripcion.
+               - Experiencia < 6 meses: 50,000
+               - 6 a menos de 12 meses: 45,000
+               - ≥ 12 meses: 40,000"""
+            try:
+                exp = int(joven.experienciaJoven)
+            except:
+                exp = 0
+            if exp < 6:
+                joven.baseInscripcion = 50000
+            elif exp < 12:
+                joven.baseInscripcion = 45000
+            else:
+                joven.baseInscripcion = 40000
+
+    def crearJoven(self, fieldFrame):
+            valores = [fieldFrame.getValue(c).strip() for c in
+                       ["nombre", "apellido", "edad", "experienciaJoven", "eps",
+                        "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]]
+            if "" in valores:
+                messagebox.showwarning("Campos Incompletos", "Todos los campos son obligatorios.")
+                return
+            try:
+                edad = int(valores[2])
+                experiencia = int(valores[3])
+            except ValueError:
+                messagebox.showerror("Error", "Edad y Experiencia deben ser números.")
+                return
+            deporteSeleccionado = self.deporteVar.get()
+            nuevoId = max([int(j.id) for j in Joven.listaJovenes if isinstance(j.id, int)], default=0) + 1
+            nuevoJoven = Joven(
+                valores[0],
+                valores[1],
+                nuevoId,
+                edad,
+                experiencia,
+                valores[4],
+                valores[5],
+                valores[6],
+                ""
+            )
+            nuevoJoven.deporte = deporteSeleccionado
+            messagebox.showinfo("Éxito",
+                                f"Joven {nuevoJoven.getNombreCompleto()} creado correctamente con ID {nuevoJoven.id}.\n"
+                                "Ahora puede inscribirlo en un horario.")
 
     def mostrarInscripciones(self):
-        inscripciones = []
-        for j in Joven.listaJovenes:
-            estado = "Inscrito" if j.inscripcionPagada else "No Inscrito"
-            fechasStr = ", ".join(j.fechas) if hasattr(j, "fechas") and j.fechas else "Sin fechas"
-            inscripciones.append(f"{j.getNombreCompleto()} (ID: {j.id}) - {j.deporte} - {estado} - {fechasStr}")
+            listaWin = tk.Toplevel(self.contentFrame)
+            listaWin.title("Listado de Jóvenes")
+            listaBox = tk.Listbox(listaWin, width=100, height=20)
+            listaBox.pack(padx=10, pady=10, fill="both", expand=True)
 
-        if inscripciones:
-            messagebox.showinfo("Inscripciones", "\n".join(inscripciones))
-        else:
-            messagebox.showinfo("Inscripciones", "No hay jóvenes registrados.")
+            for j in Joven.listaJovenes:
+                estado = "Inscrito" if j.inscripcionPagada else "No Inscrito"
+                fechasStr = ", ".join(j.fechas) if hasattr(j, "fechas") and j.fechas else "Sin fechas"
+                inscripcionValor = f"${j.baseInscripcion + j.totalCompras}" if hasattr(j,
+                                                                                       "baseInscripcion") else "No calculado"
+                listaBox.insert(tk.END,
+                                f"{j.getNombreCompleto()} (ID: {j.id}) - {j.deporte} - {estado} - Inscripción: {inscripcionValor} - {fechasStr}")
 
+            def mostrarDetalles():
+                selected = listaBox.curselection()
+                if not selected:
+                    messagebox.showwarning("Detalles", "Seleccione un joven para ver los detalles.")
+                    return
+                index = selected[0]
+                joven = Joven.listaJovenes[index]
+                tarifa_base = joven.baseInscripcion if hasattr(joven, "baseInscripcion") else "No asignada"
+                total_compras = joven.totalCompras
+                valor_total = joven.baseInscripcion + joven.totalCompras if hasattr(joven,
+                                                                                    "baseInscripcion") else "No calculado"
+                messagebox.showinfo("Inscripción Registrada",
+                                    f"Joven {joven.getNombreCompleto()} formalizado.\n"
+                                    f"Tarifa base: {tarifa_base}.\n"
+                                    f"Total Compras: {total_compras}.\n"
+                                    f"Valor actual de inscripción: {valor_total}")
 
-#-------
+            tk.Button(listaWin, text="Detalles", command=mostrarDetalles).pack(pady=5)
+            tk.Button(listaWin, text="Cerrar", command=listaWin.destroy).pack(pady=5)
+
+    def seleccionarJovenParaTienda(self):
+            selWindow = tk.Toplevel(self.contentFrame)
+            selWindow.title("Seleccionar Joven para Tienda")
+            inscriptos = [j for j in Joven.listaJovenes if j.horario]
+            if not inscriptos:
+                messagebox.showinfo("Seleccion", "No hay jóvenes inscritos.")
+                selWindow.destroy()
+                return
+            self.jovenesTiendaLabels = [f"{j.getNombreCompleto()} (ID: {j.id}) - {j.deporte}" for j in inscriptos]
+            self.jovenesTiendaRefs = inscriptos
+            tk.Label(selWindow, text="Seleccione un Joven:", font=("Arial", 12)).pack(pady=5)
+            jovenVar = tk.StringVar()
+            jovenVar.set(self.jovenesTiendaLabels[0])
+            tk.OptionMenu(selWindow, jovenVar, *self.jovenesTiendaLabels).pack()
+            tk.Button(selWindow, text="Usar Tienda",
+                      command=lambda: self.mostrarTiendaParaJoven(jovenVar, selWindow)).pack(
+                pady=10)
+
+    def mostrarTiendaParaJoven(self, jovenVar, parentWindow):
+            etiqueta = jovenVar.get()
+            indice = self.jovenesTiendaLabels.index(etiqueta)
+            joven = self.jovenesTiendaRefs[indice]
+            parentWindow.destroy()
+            deporte = joven.deporte
+            articulosFiltrados = [art for art in self.tiendaEscuela.listarArticulos() if art.tipoArticulo == deporte]
+            if not articulosFiltrados:
+                messagebox.showinfo("Tienda", "No hay artículos para este deporte.")
+                return
+            tiendaWindow = tk.Toplevel(self.contentFrame)
+            tiendaWindow.title("Tienda para " + joven.getNombreCompleto())
+            tk.Label(tiendaWindow, text=f"Artículos de {deporte}", font=("Arial", 14)).pack(pady=5)
+            listbox = tk.Listbox(tiendaWindow, width=80)
+            for art in articulosFiltrados:
+                listbox.insert(tk.END, str(art))
+            listbox.pack(padx=10, pady=10)
+            if not hasattr(joven, "totalCompras"):
+                joven.totalCompras = 0
+
+            def comprarArticulo():
+                selected = listbox.curselection()
+                if not selected:
+                    messagebox.showwarning("Tienda", "Seleccione un artículo para comprar.")
+                    return
+                index = selected[0]
+                articulo = articulosFiltrados[index]
+                if articulo.stockArticulo > 0:
+                    articulo.stockArticulo -= 1
+                    joven.totalCompras += articulo.precio
+                    messagebox.showinfo("Compra", f"Se ha agregado el artículo {articulo.nombreArticulo} por ${articulo.precio}.")
+                    listbox.delete(index)
+                    listbox.insert(index, str(articulo))
+                else:
+                    messagebox.showinfo("Compra", "El artículo está agotado.")
+
+            tk.Button(tiendaWindow, text="Comprar", command=comprarArticulo).pack(pady=5)
+
+            def finalizar():
+                valor_actual = joven.baseInscripcion + joven.totalCompras if hasattr(joven,
+                                                                                     "baseInscripcion") else "No calculado"
+                messagebox.showinfo("Total Compras", f"El total de inscripción hasta ahora es: ${valor_actual}")
+                tiendaWindow.destroy()
+
+            tk.Button(tiendaWindow, text="Finalizar", command=finalizar).pack(pady=5)
+
+    #-------
 
     def salir(self):
         from src.UDManager.baseDatos.serializador import Serializador
