@@ -967,14 +967,66 @@ class Application(tk.Tk):
     def mostrarPagos(self):
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
-        title = tk.Label(self.contentFrame, text="Gestion de Pagos", font=("Arial", 18), bg="white")
+
+        title = tk.Label(self.contentFrame, text="Gestión de Pagos", font=("Arial", 25, "bold"), bg="white")
         title.pack(pady=10)
-        tk.Button(self.contentFrame, text="Pagar Suscripcion", command=self.pagarSuscripcion).pack(pady=5)
-        tk.Button(self.contentFrame, text="Cancelar Suscripcion", command=self.cancelarSuscripcion).pack(pady=5)
-        tk.Button(self.contentFrame, text="Pagar Reserva", command=self.pagarReserva).pack(pady=5)
-        tk.Button(self.contentFrame, text="Pagar Evento", command=self.pagarEvento).pack(pady=5)
-        tk.Button(self.contentFrame, text="Comprar Boleta (Evento/Torneo)", command=self.comprarBoleta).pack(pady=5)
-        tk.Button(self.contentFrame, text="Pagar Torneo", command=self.pagarTorneo).pack(pady=5)
+
+        botones1 = tk.Frame(self.contentFrame, bg="white", width=300, height=300, padx=40, pady=40)
+        botones1.pack(padx=150, pady=(20, 5), anchor="ne")
+
+        botones2 = tk.Frame(self.contentFrame, bg="white", width=300, height=300, padx=40, pady=40)
+        botones2.pack(padx=150, pady=(5, 5), anchor="sw")
+
+        self.img_pagos1 = tk.PhotoImage(file="images/img_pagos1.png", width=276, height=276)
+        self.img_pagos2 = tk.PhotoImage(file="images/img_pagos2.png", width=276, height=276)
+
+        tk.Button(botones1,
+                  text="Pagar Suscripción",
+                  width=25,
+                  height=2,
+                  relief="groove",
+                  overrelief="solid").pack(pady=15)
+        tk.Button(botones1,
+                  text="Cancelar Suscripción",
+                  width=25,
+                  height=2,
+                  relief="groove",
+                  overrelief="solid").pack(pady=15,
+                                            padx=(10, 50),
+                                            anchor="w")
+        tk.Button(botones1,
+                  text="Pagar Reserva",
+                  width=25,
+                  height=2,
+                  relief="groove",
+                  overrelief="solid").pack(pady=15)
+
+        self.labelImg1 = tk.Label(self.contentFrame,image=self.img_pagos1, bg="white")
+        self.labelImg1.place(x=200, y=110)
+
+        tk.Button(botones2,
+                  text="Pagar Evento",
+                  width=25,
+                  height=2,
+                  relief="groove",
+                  overrelief="solid").pack(pady=15)
+        tk.Button(botones2,
+                  text="Comprar Boleta",
+                  width=25,
+                  height=2,
+                  relief="groove",
+                  overrelief="solid").pack(pady=15,
+                                           padx=(50, 10),
+                                           anchor="e")
+        tk.Button(botones2,
+                  text="Pagar Torneo",
+                  width=25,
+                  height=2,
+                  relief="groove",
+                  overrelief="solid").pack(pady=15)
+
+        self.labelImg2 = tk.Label(self.contentFrame, image=self.img_pagos2, bg="white")
+        self.labelImg2.place(x=620, y=390)
 
     def pagarSuscripcion(self):
         pass
@@ -986,13 +1038,15 @@ class Application(tk.Tk):
         pass
 
     def pagarEvento(self):
-        messagebox.showinfo("Pago", "Funcionalidad de pago de eventos no implementada en este ejemplo.")
+
+        pass
 
     def comprarBoleta(self):
         pass
 
     def pagarTorneo(self):
         pass
+
 ###FORMATIVO
     
     def UltimoDiaDelMes(self, fecha):
