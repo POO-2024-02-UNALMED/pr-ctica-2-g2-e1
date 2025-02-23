@@ -17,7 +17,7 @@ class Reserva:
         instalacion.agregar_reserva(self)
 
     def __str__(self):
-        return (f"Reserva {self.ID} (Pago: {self.ID_pago}) para {self.cliente.getNombreCompleto()} "
+        return (f"Reserva {self.ID} (Pago: {self.ID_pago}) para {self.cliente} "
                 f"en {self.instalacion.nombre}. De {self.fechaReserva.getInicioReserva()} "
                 f"a {self.fechaReserva.getFinReserva()}. Total a pagar: {self.aPagar} - Pagada: {self.pagada}")
 
