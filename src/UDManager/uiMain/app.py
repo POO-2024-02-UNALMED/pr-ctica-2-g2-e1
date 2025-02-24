@@ -750,7 +750,8 @@ class Application(tk.Tk):
                 tournament_text = f"Nombre: {torneo.nombre}\n" \
                                   f"Deporte: {torneo.deporte}\n" \
                                   f"Instalación: {torneo.instalacion}\n" \
-                                  f"{ticket_info}\n{pago_info}"
+                                  f"{ticket_info}\n{pago_info} \n" \
+                                  f"Pagado: {"Si" if torneo.pagado else "No"}"
                 tournament_label = tk.Label(frame, text=tournament_text, font=("Arial", 12), anchor="w", justify="left")
                 tournament_label.pack(pady=10, padx=10, anchor="w")
         else:
@@ -1146,7 +1147,7 @@ class Application(tk.Tk):
                                command=lambda: self.onAceptar(clienteSelect, nombreTorneoEntry, deporteSelect,
                                                               instalacionSelect, fechaInicioEntry, fechaFinEntry,
                                                               equipos, torneoWin))
-        aceptarBtn.pack(pady=20)
+        aceptarBtn.pack(pady=5)
 
 
     def editarEquipos(self):
@@ -1278,8 +1279,6 @@ class Application(tk.Tk):
 
             equipo.participantes = participantes
 
-            # Serializar los cambios
-            from src.UDManager.baseDatos.serializador import Serializador
             Serializador.serializar()
 
             messagebox.showinfo("Éxito", "Participantes guardados y cambios serializados exitosamente.")
@@ -1334,6 +1333,9 @@ class Application(tk.Tk):
 
 
     #////////////////////EVENTOS/////////////////////////////////////////
+    #////////////////////////////////////////////////////////////////////
+    #////////////////////////////////////////////////////////////////////
+    #////////////////////////////////////////////////////////////////////
 
     def mostrarEventos(self):
         for widget in self.contentFrame.winfo_children():
@@ -1625,6 +1627,7 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
+                  command=self.menuPagarTorneo,
                   overrelief="solid").pack(pady=15)
 
         self.labelImg2 = tk.Label(self.contentFrame, image=self.img_pagos2, bg="white")
@@ -1869,10 +1872,42 @@ class Application(tk.Tk):
         for boleta in evento.boletas:
             listbox_boletas.insert(tk.END, str(boleta))
 
+        # PAGO TORNEO
 
+    def menuPagarTorneo(self):
+        self.winPagarTorneo = tk.Toplevel(self.contentFrame)
+        self.winPagarTorneo.geometry("600x300")
+        self.winPagarTorneo.resizable(False, False)
+        self.winPagarTorneo.title("Pagar Torneo")
+
+        tk.Label(self.winPagarTorneo, text="Elija un torneo", font=("Arial", 20, "italic")).pack(pady=10)
+
+        self.listbox = tk.Listbox(self.winPagarTorneo, width=80, height=10)
+        self.listbox.pack(pady=10)
+
+        self.actualizarListaTorneos()
+
+        btn_pagar = tk.Button(self.winPagarTorneo, text="Pagar Torneo", command=self.pagarTorneo)
+        btn_pagar.pack(pady=10)
+
+    def actualizarListaTorneos(self):
+        self.listbox.delete(0, tk.END)
+        self.torneos_no_pagados = [t for t in Torneo.torneos if not t.pagado]
+        for torneo in self.torneos_no_pagados:
+            self.listbox.insert(tk.END, torneo)
 
     def pagarTorneo(self):
-        pass
+        seleccion = self.listbox.curselection()
+        if seleccion:
+            torneo = self.torneos_no_pagados[seleccion[0]]
+            respuesta = messagebox.askyesno("Confirmación de pago",
+                                                f"¿Desea pagar el torneo {torneo.nombre} por $300.000?")
+            if respuesta:
+                torneo.pagado = True
+                self.actualizarListaTorneos()
+                messagebox.showinfo("Pago Exitoso", f"El torneo {torneo.nombre} ha sido pagado exitosamente.")
+
+        Serializador.serializar()
 
     ###FORMATIVO/////////////////////////////////////////////////////////////////////////////////////
     #///////////////////////////////////////////////////////////////////////////////////

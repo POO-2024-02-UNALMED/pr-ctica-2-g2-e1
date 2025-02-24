@@ -18,10 +18,11 @@ class Torneo:
         self.boletas = []
         self.idTorneo = len(Torneo.torneos) + 1
         self.nombre = "Torneo"
+        self.pagado = False
         self.fechaInicio = fechaInicio
         self.fechaFin = fechaFin
-        self.ticket_id = 0  # We will generate this later
-        self.pago_id = 0 # We will generate this ID as well
+        self.ticket_id = 0
+        self.pago_id = 0
         Torneo.torneos.append(self)
 
     def generar_ticket_id(self):
@@ -34,7 +35,6 @@ class Torneo:
 
 
     def generar_pago_id(self):
-        # Generate a unique payment ID using a random integer
         self.pago_id = f"PAY-{random.randint(100000, 999999)}"
 
     @staticmethod
@@ -46,4 +46,4 @@ class Torneo:
         return Torneo.torneos
 
     def __str__(self):
-        return "Hola"
+        return f"Nombre: {self.nombre} - Deporte: {self.deporte} - Pagado: {"Si" if self.pagado else "No"} - ID: {self.ticket_id}"
