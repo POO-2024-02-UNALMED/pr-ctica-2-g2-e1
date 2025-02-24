@@ -31,5 +31,5 @@ class Cliente(Persona):
         return "Cliente"
 
     def __str__(self):
-        return (f"Cliente: {self.getNombreCompleto()} (ID: {self.ID})\n"
+        return (f"Cliente: {self.getNombreCompleto()} ID: {self.ID}\n  "
                 f"Suscripción: {self.suscripcion.nivel}")

@@ -9,6 +9,7 @@ from src.UDManager.gestorAplicacion.eventos.evento import Evento
 from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 from src.UDManager.gestorAplicacion.inscripcion.tiendaEscuela import TiendaEscuela
 from src.UDManager.gestorAplicacion.inscripcion.articuloTiendaEscuela import ArticuloTiendaEscuela
+from src.UDManager.gestorAplicacion.pagos.suscripcion import Suscripcion
 from src.UDManager.gestorAplicacion.reservas.fechaReserva import FechaReserva
 from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
 from src.UDManager.gestorAplicacion.reservas.reserva import Reserva
@@ -1521,12 +1522,14 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
+                  command=self.pagarSuscripcion,
                   overrelief="solid").pack(pady=15)
         tk.Button(botones1,
                   text="Cancelar Suscripción",
                   width=25,
                   height=2,
                   relief="groove",
+                  command=self.menuCancelarSuscripcion,
                   overrelief="solid").pack(pady=15,
                                            padx=(10, 50),
                                            anchor="w")
@@ -1535,7 +1538,7 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
-                  command=self.pagarReserva,
+                  command=self.menuPagarReserva,
                   overrelief="solid").pack(pady=15)
 
         self.labelImg1 = tk.Label(self.contentFrame,image=self.img_pagos1, bg="white")
@@ -1547,6 +1550,7 @@ class Application(tk.Tk):
                   height=2,
                   relief="groove",
                   overrelief="solid").pack(pady=15)
+
         tk.Button(botones2,
                   text="Comprar Boleta",
                   width=25,
@@ -1566,13 +1570,115 @@ class Application(tk.Tk):
         self.labelImg2 = tk.Label(self.contentFrame, image=self.img_pagos2, bg="white")
         self.labelImg2.place(x=620, y=390)
 
+#PAGAR SUSCRIPCION
     def pagarSuscripcion(self):
-        pass
+        self.winPagarSuscripcion = tk.Toplevel(self.contentFrame)
+        self.winPagarSuscripcion.title("Pagar Suscripcion")
+        self.winPagarSuscripcion.resizable(False, False)
+        self.winPagarSuscripcion.geometry("500x400")
+
+        tk.Label(self.winPagarSuscripcion,
+                 text="Eliga un Cliente",
+                 font=("Arial", 20, "bold")).pack(pady=15)
+
+        self.listbox = tk.Listbox(self.winPagarSuscripcion,width=50)
+        self.listbox.pack(padx=10,pady=15)
+
+        for cliente in self.clientes:
+            self.listbox.insert(tk.END, cliente)
+
+        self.btnPagar = tk.Button(self.winPagarSuscripcion, text="Pagar Suscripción",
+                                  command=self.abrirOpcionesSuscripcion)
+        self.btnPagar.pack()
+
+    def abrirOpcionesSuscripcion(self):
+        seleccion = self.listbox.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Seleccione un cliente primero.")
+            return
+
+        self.clienteSeleccionado = self.clientes[seleccion[0]]
+
+        self.winOpciones = tk.Toplevel(self.winPagarSuscripcion)
+        self.winOpciones.title("Seleccionar Suscripción")
+        self.winOpciones.geometry("300x300")
+        self.winOpciones.resizable(False, False)
+
+        opciones = ["Rookie - $10,000", "ProPlayer - $20,000", "MVP - $30,000"]
+        self.niveles = {"Rookie": 10000, "ProPlayer": 20000, "MVP": 30000}
+
+        tk.Label(self.winOpciones, text="Seleccione una Suscripción",font=("Arial",12,"italic")).pack()
+        self.listboxSuscripciones = tk.Listbox(self.winOpciones,width=30)
+        self.listboxSuscripciones.pack(padx=10,pady=15)
+
+        for opcion in opciones:
+            self.listboxSuscripciones.insert(tk.END, opcion)
+
+        self.btnConfirmar = tk.Button(self.winOpciones, text="Confirmar", command=self.confirmarPago)
+        self.btnConfirmar.pack()
+
+    def confirmarPago(self):
+        seleccion = self.listboxSuscripciones.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Seleccione una suscripción primero.")
+            return
+
+        opciones = list(self.niveles.keys())
+        seleccionada = opciones[seleccion[0]]
+        costo = self.niveles[seleccionada]
+
+        respuesta = messagebox.askyesno("Confirmar Pago", f"¿Desea comprar la suscripción {seleccionada} por ${costo}?")
+
+        if respuesta:
+            self.clienteSeleccionado.suscripcion = Suscripcion(seleccionada, costo)
+            messagebox.showinfo("Éxito", f"Suscripción {seleccionada} adquirida con éxito.")
+            self.winOpciones.destroy()
+
+        Serializador.serializar()
+
+#CANCELAR SUSCRIPCION
+
+    def menuCancelarSuscripcion(self):
+        self.winCancelarSuscripcion = tk.Toplevel(self.contentFrame)
+        self.winCancelarSuscripcion.title("Cancelar Suscripción")
+        self.winCancelarSuscripcion.resizable(False, False)
+        self.winCancelarSuscripcion.geometry("500x400")
+
+        tk.Label(self.winCancelarSuscripcion, text="Seleccione un Cliente",font=("Arial",14,"italic")).pack()
+
+        self.listbox = tk.Listbox(self.winCancelarSuscripcion,width=40)
+        self.listbox.pack(padx=10,pady=15)
+
+        for cliente in self.clientes:
+            self.listbox.insert(tk.END, cliente)
+
+        self.btnCancelar = tk.Button(self.winCancelarSuscripcion, text="Cancelar Suscripción",
+                                     command=self.cancelarSuscripcion)
+        self.btnCancelar.pack()
 
     def cancelarSuscripcion(self):
-        pass
+        seleccion = self.listbox.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Seleccione un cliente primero.")
+            return
 
-    def pagarReserva(self):
+        clienteSeleccionado = self.clientes[seleccion[0]]
+
+        if clienteSeleccionado.suscripcion.nivel == "Ninguno":
+            messagebox.showwarning("Advertencia", "Este cliente no tiene una suscripción activa para cancelar.")
+            return
+
+        respuesta = messagebox.askyesno("Confirmar Cancelación", "¿Está seguro de que desea cancelar la suscripción?")
+
+        if respuesta:
+            clienteSeleccionado.suscripcion = Suscripcion("Ninguno", 0)
+            messagebox.showinfo("Éxito", "La suscripción ha sido cancelada.")
+
+        Serializador.serializar()
+
+#PAGAR RESERVA
+
+    def menuPagarReserva(self):
         self.winPagarReserva = tk.Toplevel(self.contentFrame)
         self.winPagarReserva.title("Pagar Reserva")
         self.winPagarReserva.geometry("600x400")
@@ -1583,19 +1689,19 @@ class Application(tk.Tk):
         self.listbox = tk.Listbox(self.winPagarReserva,width=60)
         self.listbox.pack(fill="both", padx=10, pady=5)
 
-        self.actualizar_lista()
+        self.actualizarLista()
 
-        btn_pagar = tk.Button(self.winPagarReserva, text="Pagar", command=self.pagar_reserva)
+        btn_pagar = tk.Button(self.winPagarReserva, text="Pagar", command=self.pagarReserva)
         btn_pagar.pack(pady=10)
 
-    def actualizar_lista(self):
+    def actualizarLista(self):
         self.listbox.delete(0, tk.END)
         for reserva in Reserva.listaReservas:
             if not reserva.pagada:  # Solo mostrar reservas no pagadas
                 self.listbox.insert(tk.END,
                                     f"ID: {reserva.ID} - Cliente: {reserva.cliente} - Instalación: {reserva.instalacion.nombre} - Fecha: {reserva.fechaReserva.getInicioReserva().strftime('%Y-%m-%d %H:%M')}")
 
-    def pagar_reserva(self):
+    def pagarReserva(self):
         seleccion = self.listbox.curselection()
         if seleccion:
             index = seleccion[0]
@@ -1612,6 +1718,8 @@ class Application(tk.Tk):
     def pagarFormativo(self):
 
         pass
+
+#COMPRAR BOLETA
 
     def menuComprarBoleta(self):
         self.winComprarBoleta = tk.Toplevel(self.contentFrame)
@@ -1665,7 +1773,9 @@ class Application(tk.Tk):
     def pagarTorneo(self):
         pass
 
-    ###FORMATIVO
+    ###FORMATIVO/////////////////////////////////////////////////////////////////////////////////////
+    #///////////////////////////////////////////////////////////////////////////////////
+    #//////////////////////////////////////////////////////////////////////////////////////////////////
 
     def crearTienda(self):
         """Crea la tienda y precarga 5 artículos por cada deporte."""
