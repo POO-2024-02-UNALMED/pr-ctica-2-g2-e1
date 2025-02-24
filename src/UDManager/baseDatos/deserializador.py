@@ -13,7 +13,7 @@ class Deserializador:
     @staticmethod
     def deserializar():
         try:
-            with open("database.txt", "rb") as f:
+            with open("../baseDatos/database.txt", "rb") as f:
                 data = pickle.load(f)
                 cl.Cliente.setListaClientes(data.get("clientes", []))
                 res.Reserva.setListaReservas(data.get("reservas", []))

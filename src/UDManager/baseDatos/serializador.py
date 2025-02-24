@@ -15,7 +15,7 @@ class Serializador:
         # Se serializan los datos de cada módulo en archivos separados.
         # Se puede implementar según la lógica del proyecto.
         try:
-            with open("database.txt", "wb") as f:
+            with open("../baseDatos/database.txt", "wb") as f:
                 pickle.dump({
                     "clientes": cl.Cliente.getListaClientes(),
                     "reservas": res.Reserva.getListaReservas(),
