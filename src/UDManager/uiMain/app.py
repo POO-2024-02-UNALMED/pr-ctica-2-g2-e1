@@ -139,14 +139,19 @@ class Application(tk.Tk):
     def mostrarClientes(self):
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
+
         title = tk.Label(self.contentFrame, text="Gestion de Clientes", font=("Arial", 18), bg="white")
         title.pack(pady=10)
+
+        # Frame donde va el FieldFrame y botones Aceptar/Borrar
         formFrame = tk.Frame(self.contentFrame, bg="white")
         formFrame.pack(pady=10, fill="x")
+
         criteria = ["Nombre", "Apellido", "Edad"]
         readOnly = []
         fieldFrame = FieldFrame(formFrame, "Criterio", criteria, "Valor", None, readOnly)
         fieldFrame.pack(fill="both", expand=True, padx=10, pady=10)
+
         btnFrame = tk.Frame(formFrame, bg="white")
         btnFrame.pack(side="bottom", pady=10)
 
@@ -164,31 +169,43 @@ class Application(tk.Tk):
                     edad = int(fieldFrame.getValue("Edad"))
                 except ValueError:
                     edad = 0
-                # El cliente se crea y se guarda en la lista global automáticamente
+                # Crear y guardar en la lista global
                 nuevoCliente = Cliente(nombre=nombre, apellido=apellido, edad=edad)
-                messagebox.showinfo("Exito", f"Cliente '{nuevoCliente.getNombreCompleto()}' creado con ID {nuevoCliente.ID}.")
+                messagebox.showinfo("Exito",
+                                    f"Cliente '{nuevoCliente.getNombreCompleto()}' creado con ID {nuevoCliente.ID}.")
                 for crit in criteria:
                     fieldFrame.setValue(crit, "")
+            self.refreshMainListbox()
 
         def onBorrar():
             for crit in criteria:
                 fieldFrame.setValue(crit, "")
 
+        # Botones "Aceptar" y "Borrar"
         tk.Button(btnFrame, text="Aceptar", command=onAceptar).pack(side="left", padx=5)
         tk.Button(btnFrame, text="Borrar", command=onBorrar).pack(side="left", padx=5)
-        # Se agrega botón para ver clientes...
-        tk.Button(self.contentFrame, text="Ver Clientes", command=self.verClientes).pack(pady=10)
-        # Y se agrega un botón para editar clientes
+
+        # Frame  para centrar el Listbox
+        listFrame = tk.Frame(self.contentFrame, bg="white")
+        listFrame.pack(pady=10)
+
+
+        self.clientListbox = tk.Listbox(listFrame, selectmode=tk.SINGLE, height=3, width=50)
+        self.clientListbox.pack(padx=10, pady=10, anchor="center")
+
+        # Llenar el Listbox con todos los clientes existentes
+        for c in self.clientes:
+            self.clientListbox.insert(tk.END, f"ID: {c.ID} - {c.getNombreCompleto()} (Edad: {c.edad})")
+
+        # Botón para editar clientes
         tk.Button(self.contentFrame, text="Editar Clientes", command=self.editarClientes).pack(pady=10)
 
-    def verClientes(self):
-        if not self.clientes:
-            messagebox.showinfo("Clientes", "No hay clientes registrados.")
-        else:
-            info = "Lista de Clientes:\n"
-            for c in self.clientes:
-                info += f"- {c.getNombreCompleto()} (ID: {c.ID})\n"
-            messagebox.showinfo("Clientes", info)
+    def refreshMainListbox(self):
+        if not hasattr(self, 'clientListbox'):
+            return
+        self.clientListbox.delete(0, tk.END)
+        for c in self.clientes:
+            self.clientListbox.insert(tk.END, f"ID: {c.ID} - {c.getNombreCompleto()} (Edad: {c.edad})")
 
     def editarClientes(self):
         # Ventana para editar o eliminar clientes
@@ -240,9 +257,11 @@ class Application(tk.Tk):
                 except ValueError:
                     client.edad = 0
                 messagebox.showinfo("Exito", f"Cliente '{client.getNombreCompleto()}' actualizado.")
-                # Actualizar la lista
+                # Actualizar la lista local
                 listbox.delete(index)
                 listbox.insert(index, f"{client.ID} - {client.getNombreCompleto()}")
+                # Refrescar el Listbox principal
+                self.refreshMainListbox()
             else:
                 messagebox.showwarning("Seleccion", "Seleccione un cliente para editar.")
 
@@ -255,11 +274,13 @@ class Application(tk.Tk):
                     del self.clientes[index]
                     listbox.delete(index)
                     messagebox.showinfo("Eliminado", "Cliente eliminado.")
+                    self.refreshMainListbox()
             else:
                 messagebox.showwarning("Seleccion", "Seleccione un cliente para eliminar.")
 
         tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
         tk.Button(btnFrameEdit, text="Eliminar Cliente", command=eliminarCliente).pack(side="left", padx=5)
+
     #...
     def mostrarInstalaciones(self):
         for widget in self.contentFrame.winfo_children():
@@ -282,6 +303,7 @@ class Application(tk.Tk):
             missing = [crit for crit in criteria if not fieldFrameInst.getValue(crit).strip()]
             if missing:
                 messagebox.showwarning("Campos Incompletos", "Faltan: " + ", ".join(missing))
+                self.refreshInstalacionesListbox()
             else:
                 nombre = fieldFrameInst.getValue("Nombre")
                 deporte = fieldFrameInst.getValue("Deporte")
@@ -294,19 +316,23 @@ class Application(tk.Tk):
                 messagebox.showinfo("Éxito", f"Instalación '{nombre}' creada con ID {nuevaInst.id}.")
                 for crit in criteria:
                     fieldFrameInst.setValue(crit, "")
+                self.refreshInstalacionesListbox()
 
         tk.Button(btnFrame, text="Agregar Instalación", command=agregarInstalacion).pack(side="left", padx=5)
-        tk.Button(btnFrame, text="Ver Instalaciones", command=self.verInstalaciones).pack(side="left", padx=5)
+
         tk.Button(btnFrame, text="Editar Instalaciones", command=self.editarInstalaciones).pack(side="left", padx=5)
 
-    def verInstalaciones(self):
-        if not self.instalaciones:
-            messagebox.showinfo("Instalaciones", "No hay instalaciones registradas.")
-        else:
-            info = "Lista de Instalaciones:\n"
-            for inst in self.instalaciones:
-                info += f"- {inst.nombre} (ID: {inst.id})\n"
-            messagebox.showinfo("Instalaciones", info)
+        # Crear el Listbox para las instalaciones existentes en mostrarInstalaciones
+        self.instListbox = tk.Listbox(self.contentFrame, selectmode=tk.SINGLE, height=15, width=100)
+        self.instListbox.pack(padx=10, pady=10)
+
+        # Llenar el Listbox con la lista de instalaciones
+        for inst in self.instalaciones:
+            self.instListbox.insert(
+                tk.END,
+                f"ID: {inst.id} - {inst.nombre} | Deporte: {inst.deporte} | Precio/Hora: {inst.precioHora}"
+            )
+
 
     def editarInstalaciones(self):
         editWin = tk.Toplevel(self)
@@ -335,6 +361,9 @@ class Application(tk.Tk):
                 fieldFrameEdit.setValue("Nombre", inst.nombre)
                 fieldFrameEdit.setValue("Deporte", inst.deporte)
                 fieldFrameEdit.setValue("Precio Hora", str(inst.precioHora))
+            else:
+                for crit in criteria:
+                    fieldFrameEdit.setValue(crit, "")
 
         listbox.bind("<<ListboxSelect>>", cargarInstalacion)
 
@@ -356,6 +385,7 @@ class Application(tk.Tk):
                 messagebox.showinfo("Éxito", f"Instalación '{inst.nombre}' actualizada.")
                 listbox.delete(index)
                 listbox.insert(index, f"{inst.id} - {inst.nombre}")
+                self.refreshInstalacionesListbox()
             else:
                 messagebox.showwarning("Selección", "Seleccione una instalación para editar.")
 
@@ -368,11 +398,26 @@ class Application(tk.Tk):
                     del self.instalaciones[index]
                     listbox.delete(index)
                     messagebox.showinfo("Eliminado", "Instalación eliminada.")
+                    self.refreshInstalacionesListbox()
             else:
                 messagebox.showwarning("Selección", "Seleccione una instalación para eliminar.")
 
         tk.Button(btnFrameEdit, text="Guardar Cambios", command=guardarCambios).pack(side="left", padx=5)
         tk.Button(btnFrameEdit, text="Eliminar Instalación", command=eliminarInstalacion).pack(side="left", padx=5)
+
+    def refreshInstalacionesListbox(self):
+        """
+        Vuelve a llenar el Listbox de instalaciones con los datos actuales.
+        """
+        if not hasattr(self, 'instListbox'):
+            return
+        self.instListbox.delete(0, tk.END)
+        for inst in self.instalaciones:
+            self.instListbox.insert(
+                tk.END,
+                f"ID: {inst.id} - {inst.nombre} | Deporte: {inst.deporte} | Precio/Hora: {inst.precioHora}"
+            )
+
     #...........
 
     def verReservas(self):
