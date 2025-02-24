@@ -1,24 +1,19 @@
 # src/UDManager/gestorAplicacion/eventos/evento.py
 
-from src.UDManager.gestorAplicacion.eventos.localidad import Localidad
+#from src.UDManager.gestorAplicacion.eventos.localidad import Localidad
 
 class Evento:
     eventos = []
 
-    def __init__(self):
-        self.nombreEvento = ""
-        self.tipoEvento = ""
-        self.personajePrincipal = ""
-        self.generoMusical = ""
-        self.artistasInvitados = []
-        self.lugarPrincipal = None
-        self.localidades = []
-        self.toldosPatrocinados = []
-        self.foodTrucks = []
-        self.personalSeguridad = []
-        self.personalMedico = []
-        self.reservas = []
+    def __init__(self,nombre,tipoEvento,personajePrincipal,reserva):
+        self.nombre = nombre
+        self.ID = len(Evento.eventos) + 1
+        self.tipoEvento = tipoEvento
+        self.personajePrincipal = personajePrincipal
+        self.reserva = reserva
         self.boletas = []
+
+        Evento.eventos.append(self)
 
     @staticmethod
     def getEventos():
@@ -29,4 +24,6 @@ class Evento:
         Evento.eventos = lista
 
     def __str__(self):
-        return f"Evento: {self.nombreEvento} - Tipo: {self.tipoEvento}"
+        ultimo = "Cantante: " + self.personajePrincipal if self.tipoEvento == "Concierto" else ""
+        return f"Evento: {self.nombre} \n Tipo: {self.tipoEvento} \n ID: {self.ID}  " + ultimo
+
