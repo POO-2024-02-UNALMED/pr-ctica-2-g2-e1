@@ -1581,7 +1581,7 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
-                  command=self.pagarSuscripcion,
+                  command=self.menuPagarSuscripcion,
                   overrelief="solid").pack(pady=15)
         tk.Button(botones1,
                   text="Cancelar Suscripción",
@@ -1608,6 +1608,7 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
+                  command=self.menuPagarFormativo,
                   overrelief="solid").pack(pady=15)
 
         tk.Button(botones2,
@@ -1630,7 +1631,7 @@ class Application(tk.Tk):
         self.labelImg2.place(x=620, y=390)
 
 #PAGAR SUSCRIPCION
-    def pagarSuscripcion(self):
+    def menuPagarSuscripcion(self):
         self.winPagarSuscripcion = tk.Toplevel(self.contentFrame)
         self.winPagarSuscripcion.title("Pagar Suscripcion")
         self.winPagarSuscripcion.resizable(False, False)
@@ -1774,9 +1775,50 @@ class Application(tk.Tk):
                 reserva_seleccionada.pagada = True  # Marcar como pagada
                 self.actualizar_lista()  # Actualizar la lista para ocultar la reserva pagada
 
-    def pagarFormativo(self):
+#PAGAR FORMATIVO
 
-        pass
+    def menuPagarFormativo(self):
+        self.winPagarFormativo = tk.Toplevel(self.contentFrame)
+        self.winPagarFormativo.resizable(False, False)
+        self.winPagarFormativo.title("Pagar Formativo")
+        self.winPagarFormativo.geometry("400x450")
+
+        tk.Label(self.winPagarFormativo, text="Eliga un joven", font=("Arial", 20, "italic")).pack(pady=25)
+
+        self.listbox = tk.Listbox(self.winPagarFormativo, width=60)
+        self.listbox.pack(padx=10, pady=10)
+
+        # Solo agregar jóvenes que no han pagado
+        self.jovenes_no_pagados = [joven for joven in Joven.listaJovenes if not joven.inscripcionPagada]
+
+        for joven in self.jovenes_no_pagados:
+            self.listbox.insert(tk.END, str(joven) + f"- Pagado: {"Si" if joven.inscripcionPagada else "No"}")
+
+        self.btnPagar = tk.Button(self.winPagarFormativo, text="Pagar Joven", command=self.pagarJoven)
+        self.btnPagar.pack(pady=10)
+
+    def pagarJoven(self):
+        seleccionado = self.listbox.curselection()
+        if not seleccionado:
+            messagebox.showwarning("Advertencia", "Seleccione un joven primero.")
+            return
+
+        index = seleccionado[0]
+        joven = self.jovenes_no_pagados[index]  # Obtener el joven de la lista filtrada
+        total_a_pagar = joven.totalCompras + joven.baseInscripcion
+
+        confirmacion = messagebox.askyesno("Confirmar Pago",
+                                           f"¿Desea pagar la suma de {total_a_pagar} por {joven.getNombreCompleto()}?")
+
+        if confirmacion:
+            joven.inscripcionPagada = True
+            messagebox.showinfo("Pago Exitoso", f"El pago de {total_a_pagar} ha sido realizado con éxito.")
+            self.listbox.delete(index)  # Eliminar de la lista al pagarse
+            self.jovenes_no_pagados.pop(index)  # Eliminar de la lista interna
+        else:
+            messagebox.showinfo("Pago Cancelado", "El pago no se ha realizado.")
+
+        Serializador.serializar()
 
 #COMPRAR BOLETA
 
