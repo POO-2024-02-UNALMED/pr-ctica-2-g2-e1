@@ -1,4 +1,6 @@
 # src/UDManager/gestorAplicacion/eventos/evento.py
+from src.UDManager.gestorAplicacion.eventos.boleta import Boleta
+
 
 #from src.UDManager.gestorAplicacion.eventos.localidad import Localidad
 
@@ -22,6 +24,11 @@ class Evento:
     @staticmethod
     def setEventos(lista):
         Evento.eventos = lista
+
+    def agregar_boleta(self):
+        nueva_boleta = Boleta()
+        self.boletas.append(nueva_boleta)
+        return nueva_boleta
 
     def __str__(self):
         ultimo = "Cantante: " + self.personajePrincipal if self.tipoEvento == "Concierto" else ""

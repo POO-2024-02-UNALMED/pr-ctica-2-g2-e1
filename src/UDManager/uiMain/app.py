@@ -13,7 +13,6 @@ from src.UDManager.gestorAplicacion.reservas.fechaReserva import FechaReserva
 from src.UDManager.gestorAplicacion.reservas.instalacion import Instalacion
 from src.UDManager.gestorAplicacion.reservas.reserva import Reserva
 from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
-from src.UDManager.gestorAplicacion.pagos.boleta import Boleta
 from src.UDManager.gestorAplicacion.torneo.equipo import Equipo
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
 from src.UDManager.gestorAplicacion.entidades.trabajador import Trabajador
@@ -53,7 +52,6 @@ class Application(tk.Tk):
         self.instalaciones = Instalacion.listaInstalaciones
         self.torneos = Torneo.getTorneos()
         self.eventos = Evento.getEventos()
-        self.pagos = Boleta.listaBoletas
         self.arbitros = []
         self.medicos = []
         self.paramedicos = []
@@ -1544,7 +1542,7 @@ class Application(tk.Tk):
         self.labelImg1.place(x=200, y=110)
 
         tk.Button(botones2,
-                  text="Pagar Evento",
+                  text="Pagar Formativo",
                   width=25,
                   height=2,
                   relief="groove",
@@ -1554,6 +1552,7 @@ class Application(tk.Tk):
                   width=25,
                   height=2,
                   relief="groove",
+                  command=self.menuComprarBoleta,
                   overrelief="solid").pack(pady=15,
                                            padx=(50, 10),
                                            anchor="e")
@@ -1574,14 +1573,94 @@ class Application(tk.Tk):
         pass
 
     def pagarReserva(self):
+        self.winPagarReserva = tk.Toplevel(self.contentFrame)
+        self.winPagarReserva.title("Pagar Reserva")
+        self.winPagarReserva.geometry("600x400")
+        self.winPagarReserva.resizable(False, False)
+
+        tk.Label(self.winPagarReserva, text="Pagar Reserva", font=("Arial", 20, "bold")).pack(pady=10)
+
+        self.listbox = tk.Listbox(self.winPagarReserva,width=60)
+        self.listbox.pack(fill="both", padx=10, pady=5)
+
+        self.actualizar_lista()
+
+        btn_pagar = tk.Button(self.winPagarReserva, text="Pagar", command=self.pagar_reserva)
+        btn_pagar.pack(pady=10)
+
+    def actualizar_lista(self):
+        self.listbox.delete(0, tk.END)
+        for reserva in Reserva.listaReservas:
+            if not reserva.pagada:  # Solo mostrar reservas no pagadas
+                self.listbox.insert(tk.END,
+                                    f"ID: {reserva.ID} - Cliente: {reserva.cliente} - Instalación: {reserva.instalacion.nombre} - Fecha: {reserva.fechaReserva.getInicioReserva().strftime('%Y-%m-%d %H:%M')}")
+
+    def pagar_reserva(self):
+        seleccion = self.listbox.curselection()
+        if seleccion:
+            index = seleccion[0]
+            reservas_no_pagadas = [reserva for reserva in Reserva.listaReservas if not reserva.pagada]
+            reserva_seleccionada = reservas_no_pagadas[index]
+
+            confirmacion = messagebox.askyesno("Confirmar Pago",
+                                               f"Desea pagar la reserva con ID_pago: {reserva_seleccionada.ID_pago}\nMonto a Pagar: {reserva_seleccionada.aPagar}?")
+
+            if confirmacion:
+                reserva_seleccionada.pagada = True  # Marcar como pagada
+                self.actualizar_lista()  # Actualizar la lista para ocultar la reserva pagada
+
+    def pagarFormativo(self):
+
         pass
 
-    def pagarEvento(self):
+    def menuComprarBoleta(self):
+        self.winComprarBoleta = tk.Toplevel(self.contentFrame)
+        self.winComprarBoleta.geometry("600x500")
+        self.winComprarBoleta.resizable(False, False)
+        self.winComprarBoleta.title("Comprar Boleta")
 
-        pass
+        tk.Label(self.winComprarBoleta, text="Seleccione un evento", font=("Arial", 14)).pack(pady=10)
+
+        self.listbox = tk.Listbox(self.winComprarBoleta,width=80)
+        self.listbox.pack()
+        for evento in self.eventos:
+            self.listbox.insert(tk.END, evento)
+
+        tk.Button(self.winComprarBoleta, text="Comprar Boleta", command=self.comprarBoleta).pack(pady=(25,5))
+        tk.Button(self.winComprarBoleta, text="Ver Boletas", command=self.verBoletas).pack(pady=5)
 
     def comprarBoleta(self):
-        pass
+        seleccion = self.listbox.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Seleccione un evento primero")
+            return
+        evento = self.eventos[seleccion[0]]
+
+        if messagebox.askyesno("Confirmar", f"¿Desea comprar una boleta para {evento.nombre}?"):
+            boleta = evento.agregar_boleta()
+            messagebox.showinfo("Boleta Comprada", str(boleta))
+
+        Serializador.serializar()
+
+    def verBoletas(self):
+        seleccion = self.listbox.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Seleccione un evento primero")
+            return
+        evento = self.eventos[seleccion[0]]
+
+        win_boletas = tk.Toplevel(self.winComprarBoleta)
+        win_boletas.title("Boletas Compradas")
+        win_boletas.geometry("300x300")
+
+        tk.Label(win_boletas, text=f"Boletas para {evento.nombre} ID: {evento.ID}", font=("Arial", 12)).pack(pady=10)
+        listbox_boletas = tk.Listbox(win_boletas)
+        listbox_boletas.pack()
+
+        for boleta in evento.boletas:
+            listbox_boletas.insert(tk.END, str(boleta))
+
+
 
     def pagarTorneo(self):
         pass
