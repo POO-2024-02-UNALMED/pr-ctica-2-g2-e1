@@ -2,7 +2,7 @@ import pickle
 import random
 import tkinter
 import tkinter as tk
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from tkinter import messagebox
 from src.UDManager.baseDatos.serializador import Serializador
 from src.UDManager.gestorAplicacion.eventos.evento import Evento
@@ -665,23 +665,24 @@ class Application(tk.Tk):
         ticket_frame.pack(pady=10)
 
         # Function to display the number of tickets that can be sold based on the installation
-        def mostrarCantidadBoletas():
+        def mostrarCantidadBoletas(self):
             selected_tournament_name = torneo_select.get()
             selected_tournament = next(t for t in self.torneos if t.nombre == selected_tournament_name)
 
-            # Generate ticket ID if not already generated
-            selected_tournament.generar_ticket_id()  # Ensure ticket ID is generated once
+            # Generar ticket ID si no ha sido generado
+            selected_tournament.generar_ticket_id()  # Asegura que el ID de boletas esté generado
 
-            # Show the current ticket ID if it has been generated
+            # Mostrar el ticket ID generado
             ticket_info = f"ID de Boletas: {selected_tournament.ticket_id}" if selected_tournament.ticket_id else "ID de boletas no generado"
 
-            # Check the installation and set ticket limits
-            if selected_tournament.instalacion in ["Cancha F11 1", "Cancha F11 2", "Coliseo"]:
+            # Verifica la instalación y asigna el límite de boletas
+            if selected_tournament.instalacion.nombre in ["Cancha F11 1", "Cancha F11 2", "Coliseo",
+                                                          "Piscina olímpica"]:
                 max_tickets = 20000
             else:
                 max_tickets = 2000
 
-            # Create a label and entry for the number of tickets
+            # Crear una etiqueta y entrada para la cantidad de boletas
             label = tk.Label(ticket_frame, text=f"Cantidad de boletas (máximo {max_tickets}):", font=("Arial", 12))
             label.pack(pady=5)
 
@@ -696,22 +697,22 @@ class Application(tk.Tk):
                         messagebox.showerror("Error", f"Cantidad inválida. Debe ser entre 1 y {max_tickets}.")
                         return
 
-                    # Generate a unique ticket ID
-                    ticket_id = selected_tournament.ticket_id  # Use the already generated ticket ID
+                    # Generar un ID único para las boletas
+                    ticket_id = selected_tournament.ticket_id  # Usamos el ticket_id generado previamente
 
-                    # Display success message with the ticket ID
+                    # Mostrar mensaje de éxito
                     messagebox.showinfo("Éxito", f"Boletas vendidas exitosamente. ID de boleta: {ticket_id}")
-                    boletasWin.destroy()  # Close the window after selling tickets
+                    boletasWin.destroy()  # Cerrar la ventana después de vender las boletas
 
                 except ValueError:
                     messagebox.showerror("Error", "Por favor ingrese un número válido.")
 
-            # Button to confirm and generate tickets
+            # Botón para confirmar y vender las boletas
             confirm_button = tk.Button(boletasWin, text="Vender Boletas", command=generarBoletas)
             confirm_button.pack(pady=10)
 
         # Show the ticket options when a tournament is selected
-        mostrarCantidadBoletas()
+        mostrarCantidadBoletas(self)
 
     def verTorneos(self):
         torneosWin = tk.Toplevel(self)
@@ -730,9 +731,13 @@ class Application(tk.Tk):
         frame = tk.Frame(canvas)
         canvas.create_window((0, 0), window=frame, anchor="nw")
 
+        # Limpiar la lista de torneos para evitar duplicados
+        for widget in frame.winfo_children():
+            widget.destroy()
+
         if self.torneos:
             for torneo in self.torneos:
-                # Asegurarnos de que ticket_id esté generado antes de acceder a él
+                # Asegurarse de que ticket_id esté generado antes de acceder a él
                 if torneo.ticket_id:
                     ticket_info = f"ID de Boletas: {torneo.ticket_id}"
                 else:
@@ -747,13 +752,69 @@ class Application(tk.Tk):
                                   f"Instalación: {torneo.instalacion}\n" \
                                   f"{ticket_info}\n{pago_info}"
                 tournament_label = tk.Label(frame, text=tournament_text, font=("Arial", 12), anchor="w", justify="left")
-                tournament_label.pack(pady=10, padx=10)
+                tournament_label.pack(pady=10, padx=10, anchor="w")
         else:
             no_tournament_label = tk.Label(frame, text="No hay torneos registrados.", font=("Arial", 12), anchor="w")
             no_tournament_label.pack(pady=10, padx=10)
 
         frame.update_idletasks()
         canvas.config(scrollregion=canvas.bbox("all"))
+
+    def onAceptar(self, clienteSelect, nombreTorneoEntry, deporteSelect, instalacionSelect, fechaInicioEntry,
+                  fechaFinEntry, equipos, torneoWin):
+        clienteSeleccionado = next(cliente for cliente in self.clientes if
+                                   f"{cliente.ID} - {cliente.getNombreCompleto()}" == clienteSelect.get())
+        nombreTorneo = nombreTorneoEntry.get()
+        deporte = deporteSelect.get()
+
+        # Validar que se haya seleccionado una instalación
+        try:
+            instalacion = next(inst for inst in self.instalaciones if inst.nombre == instalacionSelect.get())
+        except StopIteration:
+            messagebox.showerror("Error", "La instalación seleccionada no es válida.")
+            return
+
+        # Validar fechas
+        try:
+            fechaInicio = datetime.strptime(fechaInicioEntry.get(), "%m/%d/%y")
+            fechaFin = datetime.strptime(fechaFinEntry.get(), "%m/%d/%y")
+            if (fechaFin - fechaInicio).days < 3:
+                raise ValueError("La duración del torneo debe ser de al menos 3 días.")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Fecha inválida: {e}")
+            return
+
+        # Comprobar si el torneo ya existe en la lista
+        if any(torneo.nombre == nombreTorneo for torneo in self.torneos):
+            messagebox.showerror("Error", "Ya existe un torneo con ese nombre.")
+            return
+
+        # Crear el torneo
+        equiposParticipantes = [Equipo(equipo.get()) for equipo in equipos if equipo.get().strip()]
+        torneo = Torneo(deporte, equiposParticipantes, fechaInicio, fechaFin)
+        torneo.instalacion = instalacion
+        torneo.nombre = nombreTorneo  # Establecer el nombre del torneo
+
+        # Generar ticket_id único
+        torneo.generar_ticket_id()  # Llamamos a la función para generar el ID de boletas
+
+        # Mostrar el ID de boletas generado
+        print(f"ID de boletas generado para el torneo {torneo.nombre}: {torneo.ticket_id}")
+
+        # Verificar si el torneo ya está en la lista antes de agregarlo
+        if torneo not in self.torneos:
+            self.torneos.append(torneo)
+
+        torneo.generar_pago_id()
+
+        # Mostrar mensaje de éxito
+        messagebox.showinfo("Torneo Creado",
+                            f"Torneo '{nombreTorneo}' creado exitosamente con {len(equiposParticipantes)} equipos. ID de pago: {torneo.pago_id}")
+
+        torneoWin.destroy()  # Cerramos la ventana de creación de torneo
+
+        # Refrescar la vista de torneos después de agregar el torneo
+        self.verTorneos()  # Llamamos a la función para refrescar la lista de torneos
 
     def verEquipos(self):
         # Create a new window to display the list of teams
@@ -997,7 +1058,6 @@ class Application(tk.Tk):
             print(f"Error: {e}")  # Muestra el error para depuración
             messagebox.showerror("Error", "Formato de hora incorrecto.")
 
-
     def crearTorneo(self):
         # Crear una nueva ventana para la creación del torneo
         torneoWin = tk.Toplevel(self)
@@ -1088,52 +1148,6 @@ class Application(tk.Tk):
                                                               equipos, torneoWin))
         aceptarBtn.pack(pady=20)
 
-    def onAceptar(self, clienteSelect, nombreTorneoEntry, deporteSelect, instalacionSelect, fechaInicioEntry,
-                  fechaFinEntry, equipos, torneoWin):
-        clienteSeleccionado = next(cliente for cliente in self.clientes if
-                                   f"{cliente.ID} - {cliente.getNombreCompleto()}" == clienteSelect.get())
-        nombreTorneo = nombreTorneoEntry.get()
-        deporte = deporteSelect.get()
-
-        # Validar que se haya seleccionado una instalación
-        try:
-            instalacion = next(inst for inst in self.instalaciones if inst.nombre == instalacionSelect.get())
-        except StopIteration:
-            messagebox.showerror("Error", "La instalación seleccionada no es válida.")
-            return
-
-        # Validar fechas
-        try:
-            fechaInicio = datetime.strptime(fechaInicioEntry.get(), "%m/%d/%y")
-            fechaFin = datetime.strptime(fechaFinEntry.get(), "%m/%d/%y")
-            if (fechaFin - fechaInicio).days < 3:
-                raise ValueError("La duración del torneo debe ser de al menos 3 días.")
-        except ValueError as e:
-            messagebox.showerror("Error", f"Fecha inválida: {e}")
-            return
-
-        # Comprobar si el torneo ya existe en la lista
-        if any(torneo.nombre == nombreTorneo for torneo in self.torneos):
-            messagebox.showerror("Error", "Ya existe un torneo con ese nombre.")
-            return
-
-        # Crear el torneo
-        equiposParticipantes = [Equipo(equipo.get()) for equipo in equipos if equipo.get().strip()]
-        torneo = Torneo(deporte, equiposParticipantes, fechaInicio, fechaFin, )
-        torneo.instalacion = instalacion
-        torneo.nombre = nombreTorneo  # Establecer el nombre del torneo
-
-        # Imprimir los torneos para depuración
-        print("Lista de torneos después de agregar el nuevo torneo:")
-        for t in self.torneos:
-            print(t.nombre)
-
-        torneo.generar_pago_id()
-
-        # Mostrar mensaje de éxito
-        messagebox.showinfo("Torneo Creado",
-                            f"Torneo '{nombreTorneo}' creado exitosamente con {len(equiposParticipantes)} equipos. ID de pago: {torneo.pago_id}")
-        torneoWin.destroy()  # Cerramos la ventana de creación de torneo
 
     def editarEquipos(self):
         # Crear la ventana emergente para editar equipos
@@ -1312,7 +1326,7 @@ class Application(tk.Tk):
 
     def cargarTorneos(self):
         try:
-            with open("database.txt", "rb") as f:
+            with open("../baseDatos/database.txt", "rb") as f:
                 data = pickle.load(f)
                 self.torneos = data.get("torneos", [])
         except FileNotFoundError:

@@ -1,6 +1,7 @@
 # src/UDManager/gestorAplicacion/torneo/torneo.py
 
 import random
+import time
 
 class Torneo:
     torneos = []
@@ -24,11 +25,13 @@ class Torneo:
         Torneo.torneos.append(self)
 
     def generar_ticket_id(self):
-        # Only generate ticket ID if it hasn't been generated already
-        if not self.ticket_id:
-            self.ticket_id = f"TICKET-{random.randint(100000, 999999)}"
-        else:
-            print("ID de boletas ya generado.")
+        # Usamos el tiempo actual (timestamp) y un número aleatorio para asegurar la unicidad.
+        if not self.ticket_id:  # Verificamos si ya tiene un ticket_id asignado
+            timestamp = int(time.time() * 1000)  # Tiempo en milisegundos
+            random_number = random.randint(1000, 9999)  # Un número aleatorio para mayor unicidad
+            self.ticket_id = f"TICKET-{timestamp}-{random_number}"  # Genera un ticket ID único
+        return self.ticket_id
+
 
     def generar_pago_id(self):
         # Generate a unique payment ID using a random integer

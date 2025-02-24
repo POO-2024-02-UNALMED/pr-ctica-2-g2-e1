@@ -6,7 +6,7 @@ class DataManager:
     @staticmethod
     def saveData():
         try:
-            with open("database.txt", "wb") as f:
+            with open("../baseDatos/database.txt", "wb") as f:
                 pickle.dump("datos guardados", f)
             print("Datos guardados correctamente.")
         except Exception as e:
@@ -15,7 +15,7 @@ class DataManager:
     @staticmethod
     def loadData():
         try:
-            with open("database.txt", "rb") as f:
+            with open("../baseDatos/database.txt", "rb") as f:
                 data = pickle.load(f)
             print("Datos cargados correctamente.")
             return data
