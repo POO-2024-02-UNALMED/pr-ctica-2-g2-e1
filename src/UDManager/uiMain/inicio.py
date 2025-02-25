@@ -20,6 +20,10 @@ class InicioWindow(tk.Tk):
         self.BASE_WIDTH = 800
         self.BASE_HEIGHT = 600
 
+        img = Image.open("UDM.png")
+        img = img.resize((32, 32))
+        self.iconphoto(False, ImageTk.PhotoImage(img))
+
         absoluteBase = r"uiMain"
 
         # MARCO PRINCIPAL

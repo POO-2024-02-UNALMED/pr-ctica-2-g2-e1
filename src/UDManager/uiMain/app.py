@@ -2,6 +2,7 @@ import pickle
 import random
 import tkinter
 import tkinter as tk
+from PIL import Image, ImageTk
 from datetime import datetime, timedelta, time
 from tkinter import messagebox
 from src.UDManager.baseDatos.serializador import Serializador
@@ -38,6 +39,10 @@ class Application(tk.Tk):
         self.horaFinEntry = None
         self.instalacionSelect = None
         self.menuWin = None
+
+        img = Image.open("UDM.png")
+        img = img.resize((32, 32))
+        self.iconphoto(False, ImageTk.PhotoImage(img))
 
         # Creación de la tienda para Deporte Formativo.
         self.crearTienda()
