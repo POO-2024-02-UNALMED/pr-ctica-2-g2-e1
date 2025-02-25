@@ -5,37 +5,37 @@ from abc import ABC, abstractmethod
 class Persona(ABC):
     def __init__(self, nombre="", apellido="", edad=0, id=0, **kwargs):
         super().__init__(**kwargs)
-        self._nombre = nombre
-        self._apellido = apellido
-        self._edad = edad
-        self._id = id
+        self.nombre = nombre
+        self.apellido = apellido
+        self.edad = edad
+        self.id = id
 
     def nombre(self):
-        return self._nombre
+        return self.nombre
 
     def nombre(self, valor):
-        self._nombre = valor
+        self.nombre = valor
 
     def apellido(self):
-        return self._apellido
+        return self.apellido
 
     def apellido(self, valor):
-        self._apellido = valor
+        self.apellido = valor
 
     def edad(self):
-        return self._edad
+        return self.edad
 
     def edad(self, valor):
-        self._edad = valor
+        self.edad = valor
 
     def id(self):
-        return self._id
+        return self.id
 
     def id(self, valor):
-        self._id = valor
+        self.id = valor
 
     def getNombreCompleto(self):
-        return f"{self._nombre} {self._apellido}"
+        return f"{self.nombre} {self.apellido}"
 
     @abstractmethod
     def getRol(self):
