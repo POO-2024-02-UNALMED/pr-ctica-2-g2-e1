@@ -1,11 +1,10 @@
 # src/UDManager/gestorAplicacion/entidades/persona.py
-
 from abc import ABC, abstractmethod
 import pickle
 
-#clase abstracta
 class Persona(ABC):
-    def __init__(self, nombre="", apellido="", edad=0, id=0):
+    def __init__(self, nombre="", apellido="", edad=0, id=0, **kwargs):
+        super().__init__(**kwargs)  # Permite la herencia cooperativa
         self.nombre = nombre
         self.apellido = apellido
         self.edad = edad
@@ -20,3 +19,4 @@ class Persona(ABC):
 
     def __str__(self):
         return self.getNombreCompleto()
+
