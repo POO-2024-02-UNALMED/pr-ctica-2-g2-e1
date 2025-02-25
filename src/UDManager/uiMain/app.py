@@ -40,7 +40,7 @@ class Application(tk.Tk):
         self.instalacionSelect = None
         self.menuWin = None
 
-        img = Image.open("UDM.png")
+        img = Image.open("images/UDM.png")
         img = img.resize((32, 32))
         self.iconphoto(False, ImageTk.PhotoImage(img))
 
@@ -1974,7 +1974,7 @@ class Application(tk.Tk):
 
         # Cargar la imagen "image4.png"
         try:
-            self.imagen = tk.PhotoImage(file="image4.png")
+            self.imagen = tk.PhotoImage(file="images/image4.png")
             # Creamos un label para la imagen y lo centramos con pack
             tk.Label(infoFrame, image=self.imagen, bg="white").pack(pady=5)
         except Exception as e:

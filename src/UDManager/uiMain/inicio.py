@@ -20,7 +20,7 @@ class InicioWindow(tk.Tk):
         self.BASE_WIDTH = 800
         self.BASE_HEIGHT = 600
 
-        img = Image.open("UDM.png")
+        img = Image.open("images/UDM.png")
         img = img.resize((32, 32))
         self.iconphoto(False, ImageTk.PhotoImage(img))
 
@@ -63,31 +63,31 @@ class InicioWindow(tk.Tk):
 
         # P4: Botón "Ingresar al Sistema" con imagen y texto
         try:
-            self.image1 = tk.PhotoImage(file="image1.png")
+            self.image1 = tk.PhotoImage(file="images/image1.png")
             print("Cargada image1.png")
         except Exception as e:
             print("Error al cargar image1.png:", e)
             self.image1 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image2 = tk.PhotoImage(file="image2.png")
+            self.image2 = tk.PhotoImage(file="images/image2.png")
             print("Cargada image2.png")
         except Exception as e:
             print("Error al cargar image2.png:", e)
             self.image2 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image3 = tk.PhotoImage(file="image3.png")
+            self.image3 = tk.PhotoImage(file="images/image3.png")
             print("Cargada image3.png")
         except Exception as e:
             print("Error al cargar image3.png:", e)
             self.image3 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image4 = tk.PhotoImage(file="image4.png")
+            self.image4 = tk.PhotoImage(file="images/image4.png")
             print("Cargada image4.png")
         except Exception as e:
             print("Error al cargar image4.png:", e)
             self.image4 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image5 = tk.PhotoImage(file="image5.png")
+            self.image5 = tk.PhotoImage(file="images/image5.png")
             print("Cargada image5.png")
         except Exception as e:
             print("Error al cargar image5.png:", e)
