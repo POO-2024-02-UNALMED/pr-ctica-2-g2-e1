@@ -1,5 +1,5 @@
 # src/UDManager/gestorAplicacion/entidades/persona.py
-import pickle
+
 from multimethod import multimethod
 from abc import ABC, abstractmethod
 
@@ -25,7 +25,6 @@ class Persona(ABC):
         self.__init__(id, "")
         # Asignamos el apellido recibido
         self.apellido = apellido
-
 
 
 

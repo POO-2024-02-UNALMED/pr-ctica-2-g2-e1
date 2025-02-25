@@ -2,6 +2,7 @@
 
 from src.UDManager.gestorAplicacion.entidades.persona import Persona
 from src.UDManager.gestorAplicacion.pagos.suscripcion import Suscripcion
+from multimethod import multimethod
 
 class Cliente(Persona):
     listaClientes = []
@@ -12,12 +13,29 @@ class Cliente(Persona):
         self.ID = id if id != 0 else len(Cliente.listaClientes) + 1
         Cliente.listaClientes.append(self)
 
+    @multimethod
     @staticmethod
-    def obtenerCliente(ID):
+    def obtenerCliente():#Lista completa de clientes sin parametros
+
+        return Cliente.listaClientes
+
+    @multimethod
+    @staticmethod
+    def obtenerCliente(ID):#clientes por ID
         for cliente in Cliente.listaClientes:
             if cliente.ID == ID:
                 return cliente
         return None
+
+    @multimethod
+    @staticmethod
+    def obtenerCliente(nombre: str):#Clientes por nombre
+        nombreBusqueda = nombre.lower()
+        resultados = []
+        for c in Cliente.listaClientes:
+            if nombreBusqueda in c.nombre.lower():
+                resultados.append(c)
+        return resultados
 
     @staticmethod
     def getListaClientes():

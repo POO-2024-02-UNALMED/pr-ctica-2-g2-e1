@@ -197,7 +197,7 @@ class Application(tk.Tk):
         listFrame.pack(pady=10)
 
 
-        self.clientListbox = tk.Listbox(listFrame, selectmode=tk.SINGLE, height=3, width=50)
+        self.clientListbox = tk.Listbox(listFrame, selectmode=tk.SINGLE, height=15, width=50)
         self.clientListbox.pack(padx=10, pady=10, anchor="center")
 
         # Llenar el Listbox con todos los clientes existentes

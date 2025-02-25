@@ -2,6 +2,7 @@
 
 from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
+
 class Joven(Persona):
     listaJovenes = []
 

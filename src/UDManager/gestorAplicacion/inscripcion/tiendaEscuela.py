@@ -18,3 +18,5 @@ class TiendaEscuela:
             if articulo.getIdArticulo() == id:
                 return articulo
         return None
+
+
