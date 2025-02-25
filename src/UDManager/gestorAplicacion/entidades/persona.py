@@ -14,13 +14,13 @@ class Persona(ABC):
 
     # Sobrecarga 1: Recibe (id, nombre)
     @multimethod
-    def __init__(self, id: int, nombre: str) -> None:
-        # Delegamos a la versión “default” usando argumentos con nombre
+    def __init__(self, id: int, nombre: str):
+        # mandamos a la versión “default” usando argumentos con nombre
         self.__init__(nombre=nombre, id=id)
 
     # Sobrecarga 2: Recibe (apellido, id)
     @multimethod
-    def __init__(self, apellido: str, id: int) -> None:
+    def __init__(self, apellido: str, id: int):
         # Llamada a la sobrecarga anterior (que recibe id y nombre), dejando nombre vacío
         self.__init__(id, "")
         # Asignamos el apellido recibido
