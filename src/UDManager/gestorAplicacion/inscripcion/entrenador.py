@@ -20,7 +20,8 @@ class Entrenador(Persona, Trabajador):
     def entrenar():
         return "El entrenador se encuentra entrenando al joven"
 
-
+    def entrenamiento(self):
+        return "Entrenamiento genérico: trote ligero, ejercicios de calentamiento y estiramiento."
 
     def __str__(self):
         return f"Entrenador: {self.getNombreCompleto()} - Deporte: {self.deporte}"
