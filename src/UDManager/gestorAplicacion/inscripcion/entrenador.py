@@ -11,5 +11,16 @@ class Entrenador(Persona, Trabajador):
     def getRol(self):
         return "Entrenador"
 
+    def getDeporte(self):
+        return self.deporte
+    def setDeporte(self, deporte):
+        self.deporte = deporte
+
+    @staticmethod
+    def entrenar():
+        return "El entrenador se encuentra entrenando al joven"
+
+
+
     def __str__(self):
         return f"Entrenador: {self.getNombreCompleto()} - Deporte: {self.deporte}"
