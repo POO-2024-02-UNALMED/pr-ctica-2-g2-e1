@@ -46,4 +46,4 @@ class Torneo:
         return Torneo.torneos
 
     def __str__(self):
-        return f"Nombre: {self.nombre} - Deporte: {self.deporte} - Pagado: {"Si" if self.pagado else "No"} - ID: {self.ticket_id}"
+        return f"Nombre: {self.nombre} - Deporte: {self.deporte} - Pagado: {'Si' if self.pagado else 'No'} - ID: {self.ticket_id}"

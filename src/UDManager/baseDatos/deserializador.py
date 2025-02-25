@@ -8,12 +8,14 @@ import src.UDManager.gestorAplicacion.reservas.instalacion as inst
 import src.UDManager.gestorAplicacion.torneo.torneo as tor
 from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 import pickle
+import os
 
 class Deserializador:
     @staticmethod
     def deserializar():
+        db_path = os.path.join(os.path.dirname(__file__), "..", "baseDatos", "database.txt")
         try:
-            with open("../baseDatos/database.txt", "rb") as f:
+            with open(db_path, "rb") as f:
                 data = pickle.load(f)
                 cl.Cliente.setListaClientes(data.get("clientes", []))
                 res.Reserva.setListaReservas(data.get("reservas", []))

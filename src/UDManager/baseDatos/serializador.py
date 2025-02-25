@@ -8,14 +8,14 @@ import src.UDManager.gestorAplicacion.reservas.instalacion as inst
 import src.UDManager.gestorAplicacion.torneo.torneo as tor
 from src.UDManager.gestorAplicacion.inscripcion.joven import Joven
 import pickle
+import os
 
 class Serializador:
     @staticmethod
     def serializar():
-        # Se serializan los datos de cada módulo en archivos separados.
-        # Se puede implementar según la lógica del proyecto.
+        db_path = os.path.join(os.path.dirname(__file__), "..", "baseDatos", "database.txt")
         try:
-            with open("../baseDatos/database.txt", "wb") as f:
+            with open(db_path, "wb") as f:
                 pickle.dump({
                     "clientes": cl.Cliente.getListaClientes(),
                     "reservas": res.Reserva.getListaReservas(),

@@ -18,8 +18,11 @@ from src.UDManager.gestorAplicacion.pagos.cliente import Cliente
 from src.UDManager.gestorAplicacion.torneo.equipo import Equipo
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
 from src.UDManager.gestorAplicacion.entidades.trabajador import Trabajador
+import os
 
-from excepciones import *
+
+
+from src.UDManager.uiMain.excepciones import *
 
 # Importa la clase FieldFrame desde su archivo
 from src.UDManager.uiMain.fieldFrame import FieldFrame
@@ -40,9 +43,12 @@ class Application(tk.Tk):
         self.instalacionSelect = None
         self.menuWin = None
 
-        img = Image.open("images/UDM.png")
+        directorioActual = os.path.dirname(os.path.abspath(__file__))
+        rutaImagen = os.path.join(directorioActual, "images", "UDM.png")
+        img = Image.open(rutaImagen)
         img = img.resize((32, 32))
         self.iconphoto(False, ImageTk.PhotoImage(img))
+
 
         # Creación de la tienda para Deporte Formativo.
         self.crearTienda()
@@ -758,7 +764,7 @@ class Application(tk.Tk):
                                   f"Deporte: {torneo.deporte}\n" \
                                   f"Instalación: {torneo.instalacion}\n" \
                                   f"{ticket_info}\n{pago_info} \n" \
-                                  f"Pagado: {"Si" if torneo.pagado else "No"}"
+                                  f"Pagado: {'Si' if torneo.pagado else 'No'}"
                 tournament_label = tk.Label(frame, text=tournament_text, font=("Arial", 12), anchor="w", justify="left")
                 tournament_label.pack(pady=10, padx=10, anchor="w")
         else:
@@ -1421,8 +1427,14 @@ class Application(tk.Tk):
         self.tipoEvento.trace_add("write", toggle_entry)
         toggle_entry()
 
-        self.eventoImagen = tkinter.PhotoImage(file="images/eventoImagen.png")
-        tk.Label(self.contentFrame,image=self.eventoImagen).place(x=500,y=120)
+        directorioActual = os.path.dirname(os.path.abspath(__file__))
+        rutaEvento = os.path.join(directorioActual, "images", "eventoImagen.png")
+        try:
+            self.eventoImagen = tkinter.PhotoImage(file=rutaEvento)
+        except Exception as e:
+            print("Error al cargar eventoImagen.png:", e)
+            self.eventoImagen = tkinter.PhotoImage(width=100, height=100)
+        tk.Label(self.contentFrame, image=self.eventoImagen).place(x=500, y=120)
 
     def mostrarListaEventos(self):
         winListaEventos = tk.Toplevel(self.contentFrame)
@@ -1564,8 +1576,22 @@ class Application(tk.Tk):
         botones2 = tk.Frame(self.contentFrame, bg="white", width=300, height=300, padx=40, pady=40)
         botones2.pack(padx=150, pady=(5, 5), anchor="sw")
 
-        self.img_pagos1 = tk.PhotoImage(file="images/img_pagos1.png", width=276, height=276)
-        self.img_pagos2 = tk.PhotoImage(file="images/img_pagos2.png", width=276, height=276)
+
+        directorioActual = os.path.dirname(os.path.abspath(__file__))
+        rutaPago1 = os.path.join(directorioActual, "images", "img_pagos1.png")
+        rutaPago2 = os.path.join(directorioActual, "images", "img_pagos2.png")
+
+        try:
+            self.img_pagos1 = tk.PhotoImage(file=rutaPago1, width=276, height=276)
+        except Exception as e:
+            print("Error al cargar img_pagos1.png:", e)
+            self.img_pagos1 = tk.PhotoImage(width=276, height=276)
+
+        try:
+            self.img_pagos2 = tk.PhotoImage(file=rutaPago2, width=276, height=276)
+        except Exception as e:
+            print("Error al cargar img_pagos2.png:", e)
+            self.img_pagos2 = tk.PhotoImage(width=276, height=276)
 
         tk.Button(botones1,
                   text="Pagar Suscripción",
@@ -1973,11 +1999,14 @@ class Application(tk.Tk):
         infoFrame.pack(pady=10, fill="x")  # Lo colocamos arriba, antes de los botones
 
         # Cargar la imagen "image4.png"
+        directorioActual = os.path.dirname(os.path.abspath(__file__))
+        rutaImagen4 = os.path.join(directorioActual, "images", "image4.png")
         try:
-            self.imagen = tk.PhotoImage(file="images/image4.png")
+            self.imagen = tk.PhotoImage(file=rutaImagen4)
             # Creamos un label para la imagen y lo centramos con pack
             tk.Label(infoFrame, image=self.imagen, bg="white").pack(pady=5)
         except Exception as e:
+            print("Error al cargar image4.png:", e)
             tk.Label(infoFrame, text="(No se pudo cargar la imagen)", bg="white").pack(pady=5)
 
         # Buscar el último joven inscrito (que tenga asignado un horario)

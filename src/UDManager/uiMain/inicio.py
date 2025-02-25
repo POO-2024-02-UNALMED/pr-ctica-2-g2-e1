@@ -20,11 +20,15 @@ class InicioWindow(tk.Tk):
         self.BASE_WIDTH = 800
         self.BASE_HEIGHT = 600
 
-        img = Image.open("images/UDM.png")
+        directorioActual = os.path.dirname(os.path.abspath(__file__))
+        rutaImagen = os.path.join(directorioActual, "images", "UDM.png")
+
+        img = Image.open(rutaImagen)
         img = img.resize((32, 32))
         self.iconphoto(False, ImageTk.PhotoImage(img))
 
-        absoluteBase = r"uiMain"
+        absoluteBase = directorioActual
+
 
         # MARCO PRINCIPAL
         self.mainFrame = tk.Frame(self, bg="#ecf0f1")
@@ -62,32 +66,35 @@ class InicioWindow(tk.Tk):
         welcomeLabel.pack(padx=10, pady=10, expand=True)
 
         # P4: Botón "Ingresar al Sistema" con imagen y texto
+        baseDir = os.path.dirname(os.path.abspath(__file__))
+
         try:
-            self.image1 = tk.PhotoImage(file="images/image1.png")
+            self.image1 = tk.PhotoImage(file=os.path.join(baseDir, "images", "image1.png"))
             print("Cargada image1.png")
         except Exception as e:
             print("Error al cargar image1.png:", e)
             self.image1 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image2 = tk.PhotoImage(file="images/image2.png")
+            self.image2 = tk.PhotoImage(file=os.path.join(baseDir, "images", "image2.png"))
             print("Cargada image2.png")
         except Exception as e:
             print("Error al cargar image2.png:", e)
             self.image2 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image3 = tk.PhotoImage(file="images/image3.png")
+            self.image3 = tk.PhotoImage(file=os.path.join(baseDir, "images", "image3.png"))
             print("Cargada image3.png")
         except Exception as e:
             print("Error al cargar image3.png:", e)
             self.image3 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image4 = tk.PhotoImage(file="images/image4.png")
+            self.image4 = tk.PhotoImage(file=os.path.join(baseDir, "images", "image4.png"))
+
             print("Cargada image4.png")
         except Exception as e:
             print("Error al cargar image4.png:", e)
             self.image4 = tk.PhotoImage(width=200, height=150)
         try:
-            self.image5 = tk.PhotoImage(file="images/image5.png")
+            self.image5 = tk.PhotoImage(file=os.path.join(baseDir, "images", "image5.png"))
             print("Cargada image5.png")
         except Exception as e:
             print("Error al cargar image5.png:", e)
@@ -124,7 +131,7 @@ class InicioWindow(tk.Tk):
 
         # P5: Cargar hojas de vida (CV) desde archivos de texto en la carpeta cvs
         parentDir = os.path.dirname(absoluteBase)
-        cvDir = os.path.join(parentDir, "cvs")
+        cvDir = os.path.join(baseDir, "cvs")
         self.cv1 = self.readFile(os.path.join(cvDir, "cv1.txt"))
         self.cv2 = self.readFile(os.path.join(cvDir, "cv2.txt"))
         self.cv3 = self.readFile(os.path.join(cvDir, "cv3.txt"))
@@ -188,16 +195,15 @@ class InicioWindow(tk.Tk):
     def changeResume(self, event):
         self.currentResumeIndex = (self.currentResumeIndex + 1) % len(self.resumeList)
         self.resumeLabel.config(text=self.resumeList[self.currentResumeIndex])
+        absoluteBase = os.path.dirname(os.path.abspath(__file__))
         if self.currentResumeIndex == 0:
-            newDevImages = self.loadDevImagesManual(0, "uiMain")
+            newDevImages = self.loadDevImagesManual(0, absoluteBase)
         elif self.currentResumeIndex == 1:
-            newDevImages = self.loadDevImagesManual(1, "uiMain")
+            newDevImages = self.loadDevImagesManual(1, absoluteBase)
         elif self.currentResumeIndex == 2:
-            newDevImages = self.loadDevImagesManual(2, "uiMain")
+            newDevImages = self.loadDevImagesManual(2, absoluteBase)
         elif self.currentResumeIndex == 3:
-            newDevImages = self.loadDevImagesManual(3, "uiMain")
-        else:
-            newDevImages = [tk.PhotoImage(width=100, height=100)] * 4
+            newDevImages = self.loadDevImagesManual(3, absoluteBase)
 
         self.devImages = newDevImages[:]
         self.photoLabel1.config(image=self.devImages[0])
@@ -210,91 +216,94 @@ class InicioWindow(tk.Tk):
         self.photoLabel4.image = self.devImages[3]
         self.on_resize(None)
 
+    directorioActual = os.path.dirname(os.path.abspath(__file__))
+    absoluteBase = directorioActual  # Se usa el directorio real, no "uiMain"
+
     def loadDevImagesManual(self, developerIndex, absoluteBase):
         if developerIndex == 0:
             try:
-                dev1_1 = tk.PhotoImage(file=os.path.join("images", "dev1_1.png"))
+                dev1_1 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev1_1.png"))
             except Exception as e:
                 print("Error al cargar dev1_1.png:", e)
                 dev1_1 = tk.PhotoImage(width=100, height=100)
             try:
-                dev1_2 = tk.PhotoImage(file=os.path.join("images", "dev1_2.png"))
+                dev1_2 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev1_2.png"))
             except Exception as e:
                 print("Error al cargar dev1_2.png:", e)
                 dev1_2 = tk.PhotoImage(width=100, height=100)
             try:
-                dev1_3 = tk.PhotoImage(file=os.path.join("images", "dev1_3.png"))
+                dev1_3 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev1_3.png"))
             except Exception as e:
                 print("Error al cargar dev1_3.png:", e)
                 dev1_3 = tk.PhotoImage(width=100, height=100)
             try:
-                dev1_4 = tk.PhotoImage(file=os.path.join("images", "dev1_4.png"))
+                dev1_4 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev1_4.png"))
             except Exception as e:
                 print("Error al cargar dev1_4.png:", e)
                 dev1_4 = tk.PhotoImage(width=100, height=100)
             return [dev1_1, dev1_2, dev1_3, dev1_4]
         elif developerIndex == 1:
             try:
-                dev2_1 = tk.PhotoImage(file=os.path.join("images", "dev2_1.png"))
+                dev2_1 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev2_1.png"))
             except Exception as e:
                 print("Error al cargar dev2_1.png:", e)
                 dev2_1 = tk.PhotoImage(width=100, height=100)
             try:
-                dev2_2 = tk.PhotoImage(file=os.path.join("images", "dev2_2.png"))
+                dev2_2 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev2_2.png"))
             except Exception as e:
                 print("Error al cargar dev2_2.png:", e)
                 dev2_2 = tk.PhotoImage(width=100, height=100)
             try:
-                dev2_3 = tk.PhotoImage(file=os.path.join("images", "dev2_3.png"))
+                dev2_3 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev2_3.png"))
             except Exception as e:
                 print("Error al cargar dev2_3.png:", e)
                 dev2_3 = tk.PhotoImage(width=100, height=100)
             try:
-                dev2_4 = tk.PhotoImage(file=os.path.join("images", "dev2_4.png"))
+                dev2_4 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev2_4.png"))
             except Exception as e:
                 print("Error al cargar dev2_4.png:", e)
                 dev2_4 = tk.PhotoImage(width=100, height=100)
             return [dev2_1, dev2_2, dev2_3, dev2_4]
         elif developerIndex == 2:
             try:
-                dev3_1 = tk.PhotoImage(file=os.path.join("images", "dev3_1.png"))
+                dev3_1 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev3_1.png"))
             except Exception as e:
                 print("Error al cargar dev3_1.png:", e)
                 dev3_1 = tk.PhotoImage(width=100, height=100)
             try:
-                dev3_2 = tk.PhotoImage(file=os.path.join("images", "dev3_2.png"))
+                dev3_2 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev3_2.png"))
             except Exception as e:
                 print("Error al cargar dev3_2.png:", e)
                 dev3_2 = tk.PhotoImage(width=100, height=100)
             try:
-                dev3_3 = tk.PhotoImage(file=os.path.join("images", "dev3_3.png"))
+                dev3_3 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev3_3.png"))
             except Exception as e:
                 print("Error al cargar dev3_3.png:", e)
                 dev3_3 = tk.PhotoImage(width=100, height=100)
             try:
-                dev3_4 = tk.PhotoImage(file=os.path.join("images", "dev3_4.png"))
+                dev3_4 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev3_4.png"))
             except Exception as e:
                 print("Error al cargar dev3_4.png:", e)
                 dev3_4 = tk.PhotoImage(width=100, height=100)
             return [dev3_1, dev3_2, dev3_3, dev3_4]
         elif developerIndex == 3:
             try:
-                dev4_1 = tk.PhotoImage(file=os.path.join("images", "dev4_1.png"))
+                dev4_1 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev4_1.png"))
             except Exception as e:
                 print("Error al cargar dev4_1.png:", e)
                 dev4_1 = tk.PhotoImage(width=100, height=100)
             try:
-                dev4_2 = tk.PhotoImage(file=os.path.join("images", "dev4_2.png"))
+                dev4_2 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev4_2.png"))
             except Exception as e:
                 print("Error al cargar dev4_2.png:", e)
                 dev4_2 = tk.PhotoImage(width=100, height=100)
             try:
-                dev4_3 = tk.PhotoImage(file=os.path.join("images", "dev4_3.png"))
+                dev4_3 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev4_3.png"))
             except Exception as e:
                 print("Error al cargar dev4_3.png:", e)
                 dev4_3 = tk.PhotoImage(width=100, height=100)
             try:
-                dev4_4 = tk.PhotoImage(file=os.path.join("images", "dev4_4.png"))
+                dev4_4 = tk.PhotoImage(file=os.path.join(absoluteBase, "images", "dev4_4.png"))
             except Exception as e:
                 print("Error al cargar dev4_4.png:", e)
                 dev4_4 = tk.PhotoImage(width=100, height=100)
@@ -310,12 +319,14 @@ class InicioWindow(tk.Tk):
         new_h = self.winfo_height()
         scale = min(new_w / self.BASE_WIDTH, new_h / self.BASE_HEIGHT)
 
+        baseDir = os.path.dirname(os.path.abspath(__file__))
+
         btn_files = [
-            "images/image1.png",
-            "images/image2.png",
-            "images/image3.png",
-            "images/image4.png",
-            "images/image5.png"
+            os.path.join(baseDir, "images", "image1.png"),
+            os.path.join(baseDir, "images", "image2.png"),
+            os.path.join(baseDir, "images", "image3.png"),
+            os.path.join(baseDir, "images", "image4.png"),
+            os.path.join(baseDir, "images", "image5.png")
         ]
         new_image_list = []
         for i, file in enumerate(btn_files):
@@ -333,7 +344,7 @@ class InicioWindow(tk.Tk):
         self.enterButton.image = self.imageList[self.currentImageIndex]
 
         dev_index = self.currentResumeIndex
-        dev_files = [os.path.join("images", f"dev{dev_index+1}_{i}.png") for i in range(1, 5)]
+        dev_files = [os.path.join(baseDir, "images", f"dev{dev_index + 1}_{i}.png") for i in range(1, 5)]
         new_dev_images = []
         for i, file in enumerate(dev_files):
             try:
