@@ -2008,8 +2008,8 @@ class Application(tk.Tk):
         formFrame = tk.Frame(self.contentFrame, bg="white")
         formFrame.pack(pady=10, fill="x")
 
-        criteria = ["nombre", "apellido", "edad", "experienciaJoven", "eps",
-                    "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]
+        criteria = ["Nombre", "Apellido", "Edad", "Experiencia del Joven", "Eps",
+                    "Nombre del Acudiente", "Telefono del Acudiente", "Cedula del Acudiente"]
         self.horariosDisponibles = {
             "Lunes-Miércoles 8-10": [0, 2],
             "Lunes-Miércoles 10-12": [0, 2],
@@ -2142,8 +2142,8 @@ class Application(tk.Tk):
 
     def crearJoven(self, fieldFrame):
         valores = [fieldFrame.getValue(c).strip() for c in
-                   ["nombre", "apellido", "edad", "experienciaJoven", "eps",
-                    "nombreAcudiente", "telefonoAcudiente", "cedulaAcudiente"]]
+                   ["Nombre", "Apellido", "Edad", "Experiencia del Joven", "Eps",
+                    "Nombre del Acudiente", "Telefono del Acudiente", "Cedula del Acudiente"]]
         if "" in valores:
             messagebox.showwarning("Campos Incompletos", "Todos los campos son obligatorios.")
             return
@@ -2199,8 +2199,8 @@ class Application(tk.Tk):
             messagebox.showinfo("Inscripción Registrada",
                                 f"Joven {joven.getNombreCompleto()} formalizado.\n"
                                 f"Tarifa base: {tarifa_base}.\n"
-                                f"Total Compras: {total_compras}.\n"
-                                f"Valor actual de inscripción: {valor_total}")
+                                f"Total de Compras: {total_compras}.\n"
+                                f"Valor actual de la inscripción: {valor_total}")
 
         tk.Button(listaWin, text="Detalles", command=mostrarDetalles).pack(pady=5)
         tk.Button(listaWin, text="Cerrar", command=listaWin.destroy).pack(pady=5)
