@@ -2,17 +2,17 @@
 
 class Localidad:
     def __init__(self, instalacion, ubicacion, capacidad, precioSugerido=None):
-        self.instalacionLocalidad = instalacion
-        self.ubicacion = ubicacion
-        self.capacidad = capacidad
+        self._instalacionLocalidad = instalacion
+        self._ubicacion = ubicacion
+        self._capacidad = capacidad
         if precioSugerido is None:
             ps = int(round(50000 + capacidad * 0.01))
-            self.precioSugerido = ps
+            self._precioSugerido = ps
         else:
-            self.precioSugerido = precioSugerido
-        self.division = False
-        self.menores = False
-        self.vip = False
+            self._precioSugerido = precioSugerido
+        self._division = False
+        self._menores = False
+        self._vip = False
 
     def __str__(self):
-        return f"Localidad: {self.ubicacion} - Capacidad: {self.capacidad} - Precio sugerido: {self.precioSugerido}"
+        return f"Localidad: {self._ubicacion} - Capacidad: {self._capacidad} - Precio sugerido: {self._precioSugerido}"
