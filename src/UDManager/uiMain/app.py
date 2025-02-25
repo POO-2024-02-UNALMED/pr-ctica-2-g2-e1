@@ -18,6 +18,8 @@ from src.UDManager.gestorAplicacion.torneo.equipo import Equipo
 from src.UDManager.gestorAplicacion.torneo.torneo import Torneo
 from src.UDManager.gestorAplicacion.entidades.trabajador import Trabajador
 
+from excepciones import *
+
 # Importa la clase FieldFrame desde su archivo
 from src.UDManager.uiMain.fieldFrame import FieldFrame
 
@@ -1454,88 +1456,72 @@ class Application(tk.Tk):
         btnEliminar = tk.Button(winListaEventos, text="Eliminar Evento", command=eliminarEvento)
         btnEliminar.pack(pady=5)
 
-
     def mostrarEventoReserva(self):
-        if (self.cantanteEntry.get().strip() == "" and self.tipoEvento.get() == "Concierto") or self.eventoEntry.get().strip() == "":
-            tk.messagebox.showwarning("Error","Complete todos los campos")
-        else:
+        try:
+            if (
+                    self.cantanteEntry.get().strip() == "" and self.tipoEvento.get() == "Concierto") or self.eventoEntry.get().strip() == "":
+                raise DatosEventoIncompletos()
+
             self.eventoPantalla = tk.Toplevel(self.contentFrame)
             self.eventoPantalla.title("Reserva de Evento")
             self.eventoPantalla.geometry("400x600")
             self.eventoPantalla.resizable(False, False)
 
-            labelFechaEvento = tk.Label(self.eventoPantalla, text="Selecciona una fecha (MM/DD/YY)", font=("Arial", 12))
-            labelFechaEvento.pack(pady=5)
+            tk.Label(self.eventoPantalla, text="Selecciona una fecha (MM/DD/YY)", font=("Arial", 12)).pack(pady=5)
             self.fechaEventoEntrada = tk.Entry(self.eventoPantalla)
             self.fechaEventoEntrada.insert(0, "MM/DD/YY")  # Texto por defecto
             self.fechaEventoEntrada.pack(pady=5)
 
-            labelInicioEvento = tk.Label(self.eventoPantalla, text="Hora de Inicio (HH:MM)", font=("Arial", 12))
-            labelInicioEvento.pack(pady=5)
+            tk.Label(self.eventoPantalla, text="Hora de Inicio (HH:MM)", font=("Arial", 12)).pack(pady=5)
             self.eventoInicioEntry = tk.Entry(self.eventoPantalla)
             self.eventoInicioEntry.pack(pady=5)
 
-            labelFinEvento = tk.Label(self.eventoPantalla, text="Hora de Fin (HH:MM)", font=("Arial", 12))
-            labelFinEvento.pack(pady=5)
+            tk.Label(self.eventoPantalla, text="Hora de Fin (HH:MM)", font=("Arial", 12)).pack(pady=5)
             self.eventoFinEntry = tk.Entry(self.eventoPantalla)
             self.eventoFinEntry.pack(pady=5)
 
-            labelInstalacionEvento = tk.Label(self.eventoPantalla, text="Selecciona una Instalación", font=("Arial", 12))
-            labelInstalacionEvento.pack(pady=5)
-            instalaciones = [f"{inst.nombre}" for inst in self.instalaciones]
+            tk.Label(self.eventoPantalla, text="Selecciona una Instalación", font=("Arial", 12)).pack(pady=5)
+            instalaciones = [inst.nombre for inst in self.instalaciones]
             self.instalacionEvento = tk.StringVar(self.eventoPantalla)
             self.instalacionEvento.set(instalaciones[0])
-            instalacionDropdown = tk.OptionMenu(self.eventoPantalla, self.instalacionEvento, *instalaciones)
-            instalacionDropdown.pack(pady=5)
+            tk.OptionMenu(self.eventoPantalla, self.instalacionEvento, *instalaciones).pack(pady=5)
 
-            tk.Button(self.eventoPantalla,
-                      text="Completar Reserva",
-                      width=20,
-                      height=2,
-                      relief="groove",
+            tk.Button(self.eventoPantalla, text="Completar Reserva", width=20, height=2, relief="groove",
                       command=self.validarReservaEvento).pack(pady=70, padx=60, anchor="se")
 
+        except ErrorEventos as e:
+            messagebox.showerror("Error", str(e))
+
     def validarReservaEvento(self):
-        fechaSeleccionada = self.fechaEventoEntrada.get().strip()
-
         try:
-            fechaReserva = datetime.strptime(fechaSeleccionada, "%m/%d/%y")
-        except ValueError:
-            messagebox.showerror("Error", "Formato de fecha incorrecto. Use MM/DD/YY.")
-            return
+            fechaSeleccionada = self.fechaEventoEntrada.get().strip()
+            try:
+                fechaReserva = datetime.strptime(fechaSeleccionada, "%m/%d/%y")
+            except ValueError:
+                raise FormatoFechaIncorrecto()
 
-        self.horaInicio = self.eventoInicioEntry.get().strip()
-        self.horaFin = self.eventoFinEntry.get().strip()
-        self.instalacionSeleccionada = next(
-            inst for inst in self.instalaciones if inst.nombre == self.instalacionEvento.get())
+            self.horaInicio = self.eventoInicioEntry.get().strip()
+            self.horaFin = self.eventoFinEntry.get().strip()
 
-        if len(self.horaInicio) != 5 or len(self.horaFin) != 5:
-            messagebox.showerror("Error", "El formato de la hora debe ser HH:MM.")
-            return
+            if len(self.horaInicio) != 5 or len(self.horaFin) != 5 or self.horaInicio[2] != ':' or self.horaFin[
+                2] != ':':
+                raise FormatoHoraIncorrecto()
 
-        if self.horaInicio[2] != ':' or self.horaFin[2] != ':':
-            messagebox.showerror("Error", "El formato de la hora debe ser HH:MM.")
-            return
+            horaInicioPartes = self.horaInicio.split(':')
+            horaFinPartes = self.horaFin.split(':')
 
-        horaInicioPartes = self.horaInicio.split(':')
-        horaFinPartes = self.horaFin.split(':')
+            if not (horaInicioPartes[0].isdigit() and horaInicioPartes[1].isdigit() and
+                    horaFinPartes[0].isdigit() and horaFinPartes[1].isdigit()):
+                raise FormatoHoraIncorrecto()
 
-        if not (horaInicioPartes[0].isdigit() and horaInicioPartes[1].isdigit() and
-                horaFinPartes[0].isdigit() and horaFinPartes[1].isdigit()):
-            messagebox.showerror("Error", "La hora y los minutos deben ser números.")
-            return
-
-        try:
             fechaReserva = datetime.strptime(f"{fechaSeleccionada} {self.horaInicio}", "%m/%d/%y %H:%M")
             self.horaFin = datetime.strptime(f"{fechaSeleccionada} {self.horaFin}", "%m/%d/%y %H:%M")
 
             if fechaReserva >= self.horaFin:
-                messagebox.showerror("Error", "La hora de inicio debe ser antes que la hora de fin.")
-                return
+                raise HoraInicioMayorQueFin()
 
-            if self.esReservaDuplicada(self.instalacionSeleccionada, fechaReserva, self.horaFin):
-                messagebox.showerror("Error", "Ya existe una reserva en este horario para esta instalación.")
-                return
+            self.instalacionSeleccionada = next(
+                inst for inst in self.instalaciones if inst.nombre == self.instalacionEvento.get())
 
             fechaReservaObj = FechaReserva(fechaReserva, self.horaFin)
 
@@ -1545,7 +1531,7 @@ class Application(tk.Tk):
             nuevaReserva = Reserva(self.clienteSeleccionado, self.instalacionSeleccionada, fechaReservaObj,
                                    precioReserva)
 
-            nuevoEvento = Evento(self.eventoEntry.get(),self.tipoEvento.get(),self.cantanteEntry.get(),nuevaReserva)
+            nuevoEvento = Evento(self.eventoEntry.get(), self.tipoEvento.get(), self.cantanteEntry.get(), nuevaReserva)
 
             messagebox.showinfo("Evento Creado",
                                 f"Reserva con ID {nuevaReserva.ID} y ID de pago {nuevaReserva.ID_pago} creada exitosamente.")
@@ -1555,10 +1541,8 @@ class Application(tk.Tk):
             self.eventoPantalla.destroy()
             self.mostrarEventos()
 
-        except ValueError as e:
-            print(f"Error: {e}")
-            messagebox.showerror("Error", "Formato de hora incorrecto.")
-
+        except ErrorEventos as e:
+            messagebox.showerror("Error", str(e))
 
     #///////////////////////////////PAGOS/////////////////////////////////////////////////
 
@@ -1655,49 +1639,56 @@ class Application(tk.Tk):
         self.btnPagar.pack()
 
     def abrirOpcionesSuscripcion(self):
-        seleccion = self.listbox.curselection()
-        if not seleccion:
-            messagebox.showwarning("Advertencia", "Seleccione un cliente primero.")
-            return
+        try:
+            seleccion = self.listbox.curselection()
+            if not seleccion:
+                raise ClienteNoSeleccionado()
 
-        self.clienteSeleccionado = self.clientes[seleccion[0]]
+            self.clienteSeleccionado = self.clientes[seleccion[0]]
 
-        self.winOpciones = tk.Toplevel(self.winPagarSuscripcion)
-        self.winOpciones.title("Seleccionar Suscripción")
-        self.winOpciones.geometry("300x300")
-        self.winOpciones.resizable(False, False)
+            self.winOpciones = tk.Toplevel(self.winPagarSuscripcion)
+            self.winOpciones.title("Seleccionar Suscripción")
+            self.winOpciones.geometry("300x300")
+            self.winOpciones.resizable(False, False)
 
-        opciones = ["Rookie - $10,000", "ProPlayer - $20,000", "MVP - $30,000"]
-        self.niveles = {"Rookie": 10000, "ProPlayer": 20000, "MVP": 30000}
+            opciones = ["Rookie - $10,000", "ProPlayer - $20,000", "MVP - $30,000"]
+            self.niveles = {"Rookie": 10000, "ProPlayer": 20000, "MVP": 30000}
 
-        tk.Label(self.winOpciones, text="Seleccione una Suscripción",font=("Arial",12,"italic")).pack()
-        self.listboxSuscripciones = tk.Listbox(self.winOpciones,width=30)
-        self.listboxSuscripciones.pack(padx=10,pady=15)
+            tk.Label(self.winOpciones, text="Seleccione una Suscripción", font=("Arial", 12, "italic")).pack()
+            self.listboxSuscripciones = tk.Listbox(self.winOpciones, width=30)
+            self.listboxSuscripciones.pack(padx=10, pady=15)
 
-        for opcion in opciones:
-            self.listboxSuscripciones.insert(tk.END, opcion)
+            for opcion in opciones:
+                self.listboxSuscripciones.insert(tk.END, opcion)
 
-        self.btnConfirmar = tk.Button(self.winOpciones, text="Confirmar", command=self.confirmarPago)
-        self.btnConfirmar.pack()
+            self.btnConfirmar = tk.Button(self.winOpciones, text="Confirmar", command=self.confirmarPago)
+            self.btnConfirmar.pack()
+
+        except ErrorAplicacion as e:
+            messagebox.showerror("Error", str(e))
 
     def confirmarPago(self):
-        seleccion = self.listboxSuscripciones.curselection()
-        if not seleccion:
-            messagebox.showwarning("Advertencia", "Seleccione una suscripción primero.")
-            return
+        try:
+            seleccion = self.listboxSuscripciones.curselection()
+            if not seleccion:
+                raise SuscripcionNoSeleccionada()
 
-        opciones = list(self.niveles.keys())
-        seleccionada = opciones[seleccion[0]]
-        costo = self.niveles[seleccionada]
+            opciones = list(self.niveles.keys())
+            seleccionada = opciones[seleccion[0]]
+            costo = self.niveles[seleccionada]
 
-        respuesta = messagebox.askyesno("Confirmar Pago", f"¿Desea comprar la suscripción {seleccionada} por ${costo}?")
+            respuesta = messagebox.askyesno("Confirmar Pago",
+                                            f"¿Desea comprar la suscripción {seleccionada} por ${costo}?")
 
-        if respuesta:
-            self.clienteSeleccionado.suscripcion = Suscripcion(seleccionada, costo)
-            messagebox.showinfo("Éxito", f"Suscripción {seleccionada} adquirida con éxito.")
-            self.winOpciones.destroy()
+            if respuesta:
+                self.clienteSeleccionado.suscripcion = Suscripcion(seleccionada, costo)
+                messagebox.showinfo("Éxito", f"Suscripción {seleccionada} adquirida con éxito.")
+                self.winOpciones.destroy()
 
-        Serializador.serializar()
+            Serializador.serializar()
+
+        except ErrorAplicacion as e:
+            messagebox.showerror("Error", str(e))
 
 #CANCELAR SUSCRIPCION
 
@@ -1765,8 +1756,14 @@ class Application(tk.Tk):
                                     f"ID: {reserva.ID} - Cliente: {reserva.cliente} - Instalación: {reserva.instalacion.nombre} - Fecha: {reserva.fechaReserva.getInicioReserva().strftime('%Y-%m-%d %H:%M')}")
 
     def pagarReserva(self):
-        seleccion = self.listbox.curselection()
-        if seleccion:
+        try:
+            if not any(not reserva.pagada for reserva in Reserva.listaReservas):
+                raise NoHayReservasPendientes()
+
+            seleccion = self.listbox.curselection()
+            if not seleccion:
+                raise ReservaNoSeleccionada()
+
             index = seleccion[0]
             reservas_no_pagadas = [reserva for reserva in Reserva.listaReservas if not reserva.pagada]
             reserva_seleccionada = reservas_no_pagadas[index]
@@ -1776,9 +1773,12 @@ class Application(tk.Tk):
 
             if confirmacion:
                 reserva_seleccionada.pagada = True  # Marcar como pagada
-                #BUGG self.actualizar_lista()  # Actualizar la lista para ocultar la reserva pagada
+                self.actualizarLista()  # Actualizar la lista para ocultar la reserva pagada
 
-#PAGAR FORMATIVO
+        except ErrorSeleccion as e:
+            messagebox.showerror("Error", str(e))
+
+    #PAGAR FORMATIVO
 
     def menuPagarFormativo(self):
         self.winPagarFormativo = tk.Toplevel(self.contentFrame)
