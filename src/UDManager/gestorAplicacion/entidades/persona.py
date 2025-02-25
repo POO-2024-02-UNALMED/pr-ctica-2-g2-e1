@@ -1,17 +1,33 @@
 # src/UDManager/gestorAplicacion/entidades/persona.py
 import pickle
+from multimethod import multimethod
 from abc import ABC, abstractmethod
 
 class Persona(ABC):
-    def __init__(self, nombre="", apellido="", edad=0, id=0, **kwargs):
+    @multimethod
+    def __init__(self, nombre: str = "", apellido: str = "", edad: int = 0, id: int = 0, **kwargs) -> None:
         super().__init__(**kwargs)
         self.nombre = nombre
         self.apellido = apellido
         self.edad = edad
         self.id = id
 
-    def nombre(self):
-        return self.nombre
+    # Sobrecarga 1: Recibe (id, nombre)
+    @multimethod
+    def __init__(self, id: int, nombre: str) -> None:
+        # Delegamos a la versión “default” usando argumentos con nombre
+        self.__init__(nombre=nombre, id=id)
+
+    # Sobrecarga 2: Recibe (apellido, id)
+    @multimethod
+    def __init__(self, apellido: str, id: int) -> None:
+        # Llamada a la sobrecarga anterior (que recibe id y nombre), dejando nombre vacío
+        self.__init__(id, "")
+        # Asignamos el apellido recibido
+        self.apellido = apellido
+
+
+
 
     def nombre(self, valor):
         self.nombre = valor
