@@ -24,30 +24,32 @@ class Persona(ABC):
         # Llamada a la sobrecarga anterior (que recibe id y nombre), dejando nombre vacío
         self.__init__(id, "")
         # Asignamos el apellido recibido
-        self.apellido = apellido
+        self.setApellido(apellido)
 
 
+    def getNombre(self):
+        return self.nombre
 
-    def nombre(self, valor):
-        self.nombre = valor
+    def setNombre(self, nombre):
+        self.nombre = nombre
 
-    def apellido(self):
+    def getApellido(self):
         return self.apellido
 
-    def apellido(self, valor):
-        self.apellido = valor
+    def setApellido(self, apellido):
+        self.apellido = apellido
 
-    def edad(self):
+    def getEdad(self):
         return self.edad
 
-    def edad(self, valor):
-        self.edad = valor
+    def setEdad(self, edad):
+        self.edad = edad
 
-    def id(self):
+    def getId(self):
         return self.id
 
-    def id(self, valor):
-        self.id = valor
+    def setId(self, id):
+        self.id = id
 
     def getNombreCompleto(self):
         return f"{self.nombre} {self.apellido}"
