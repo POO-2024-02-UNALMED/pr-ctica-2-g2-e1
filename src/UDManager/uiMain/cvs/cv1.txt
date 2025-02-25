@@ -1,15 +1,15 @@
-C
-c
-c
+DATOS PERSONALES:
+Nombre: Christian Bustos Betancur
+Teléfono: 3192714847
+Correo: cbustosb@unal.edu.co
 
-C
-c
-c
-ccc
+FORMACIÓN ACADÉMICA:
+Carrera: Ciencias de la Computación
+Institución: Universidad Nacional de Colombia(UNAL)
+PERFIL PROFESIONAL:
+Me caracterizo por mi proactividad, entusiasmo y compromiso para alcanzar los objetivos propuestos,
+disfruto trabajar en equipo, pero también soy capaz de desempeñarme de manera autónoma,
+asumiendo responsabilidades con seriedad y eficiencia.
 
-cc
-c
-c
-
-C
-c
+OTROS:
+Ingles Nivel C1
