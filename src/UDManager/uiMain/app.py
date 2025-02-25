@@ -1778,6 +1778,8 @@ class Application(tk.Tk):
         except ErrorSeleccion as e:
             messagebox.showerror("Error", str(e))
 
+        Serializador.serializar()
+
     #PAGAR FORMATIVO
 
     def menuPagarFormativo(self):
