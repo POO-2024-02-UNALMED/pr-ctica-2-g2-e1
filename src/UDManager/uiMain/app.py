@@ -2125,6 +2125,8 @@ class Application(tk.Tk):
         tk.Button(inscripcionWindow, text="Inscribir", command=confirmar).pack(pady=10)
 
     def asignarBaseInscripcion(self, joven):
+
+        
         """Asigna la tarifa base al joven según su experiencia, y la guarda en baseInscripcion.
            - Experiencia < 6 meses: 50,000
            - 6 a menos de 12 meses: 45,000

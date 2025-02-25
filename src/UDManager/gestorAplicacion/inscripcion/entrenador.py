@@ -12,3 +12,11 @@ class Entrenador(Persona):
 
     def __str__(self):
         return f"Entrenador: {self.getNombreCompleto()} - Deporte: {self.deporte}"
+
+
+    def isOcupado(self):
+        return self.ocupado
+
+
+    def setOcupado(self, ocupado):
+        self.ocupado = ocupado

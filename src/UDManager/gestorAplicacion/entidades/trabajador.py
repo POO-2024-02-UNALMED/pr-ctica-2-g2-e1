@@ -8,6 +8,7 @@ class Trabajador(Persona):
         self.rol = rol
         self.ocupado = False
 
+
     def getRol(self):
         return self.rol
 
