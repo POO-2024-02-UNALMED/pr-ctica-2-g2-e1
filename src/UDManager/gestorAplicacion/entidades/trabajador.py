@@ -1,13 +1,10 @@
 # src/UDManager/gestorAplicacion/entidades/trabajador.py
 
-from src.UDManager.gestorAplicacion.entidades.persona import Persona
 
-class Trabajador(Persona):
-    def __init__(self, nombre="", apellido="", rol="", edad=0):
-        super().__init__(nombre, apellido, edad)
+class Trabajador:
+    def __init__(self, rol="", *args, **kwargs):
         self.rol = rol
         self.ocupado = False
-
 
     def getRol(self):
         return self.rol
