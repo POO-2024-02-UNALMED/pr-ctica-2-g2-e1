@@ -1,5 +1,3 @@
-# src/UDManager/uiMain/inicio.py
-
 import os
 import math
 import tkinter as tk
@@ -17,8 +15,8 @@ class InicioWindow(tk.Tk):
         self.setupMenu()
 
         # Tamaño base para el escalado
-        self.BASE_WIDTH = 800
-        self.BASE_HEIGHT = 600
+        self.baseWidth = 800
+        self.baseHeight = 600
 
         directorioActual = os.path.dirname(os.path.abspath(__file__))
         rutaImagen = os.path.join(directorioActual, "images", "UDM.png")
@@ -28,7 +26,6 @@ class InicioWindow(tk.Tk):
         self.iconphoto(False, ImageTk.PhotoImage(img))
 
         absoluteBase = directorioActual
-
 
         # MARCO PRINCIPAL
         self.mainFrame = tk.Frame(self, bg="#ecf0f1")
@@ -50,7 +47,7 @@ class InicioWindow(tk.Tk):
         p4Frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # P3: Mensaje de bienvenida
-        welcome_text = (
+        welcomeText = (
             "Bienvenido a UDManager\n\n"
             "Aquí podrás realizar:\n"
             "   • Reservas de recintos deportivos\n"
@@ -59,7 +56,7 @@ class InicioWindow(tk.Tk):
             "   • Inscripciones a grupos de deportes formativos\n"
             "   • Pagos relacionados con actividades de la Unidad Deportiva"
         )
-        welcomeLabel = tk.Label(p3Frame, text=welcome_text,
+        welcomeLabel = tk.Label(p3Frame, text=welcomeText,
                                 font=("Helvetica", 16, "bold"),
                                 fg="#2c3e50", bg="white",
                                 justify="center", anchor="center")
@@ -88,7 +85,6 @@ class InicioWindow(tk.Tk):
             self.image3 = tk.PhotoImage(width=200, height=150)
         try:
             self.image4 = tk.PhotoImage(file=os.path.join(baseDir, "images", "image4.png"))
-
             print("Cargada image4.png")
         except Exception as e:
             print("Error al cargar image4.png:", e)
@@ -164,14 +160,14 @@ class InicioWindow(tk.Tk):
         self.photoLabel4.grid(row=1, column=1, padx=5, pady=5)
         self.photoLabels = [self.photoLabel1, self.photoLabel2, self.photoLabel3, self.photoLabel4]
 
-        self.mainFrame.bind("<Configure>", self.on_resize)
+        self.mainFrame.bind("<Configure>", self.onResize)
 
-    def readFile(self, filepath):
+    def readFile(self, filePath):
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filePath, "r", encoding="utf-8") as f:
                 return f.read()
         except Exception as e:
-            print(f"Error al leer {filepath}: {e}")
+            print(f"Error al leer {filePath}: {e}")
             return ""
 
     def setupMenu(self):
@@ -214,7 +210,7 @@ class InicioWindow(tk.Tk):
         self.photoLabel3.image = self.devImages[2]
         self.photoLabel4.config(image=self.devImages[3])
         self.photoLabel4.image = self.devImages[3]
-        self.on_resize(None)
+        self.onResize(None)
 
     directorioActual = os.path.dirname(os.path.abspath(__file__))
     absoluteBase = directorioActual  # Se usa el directorio real, no "uiMain"
@@ -312,51 +308,51 @@ class InicioWindow(tk.Tk):
             blank = tk.PhotoImage(width=100, height=100)
             return [blank, blank, blank, blank]
 
-    def on_resize(self, event):
+    def onResize(self, event):
         from PIL import Image, ImageTk
 
-        new_w = self.winfo_width()
-        new_h = self.winfo_height()
-        scale = min(new_w / self.BASE_WIDTH, new_h / self.BASE_HEIGHT)
+        newW = self.winfo_width()
+        newH = self.winfo_height()
+        scale = min(newW / self.baseWidth, newH / self.baseHeight)
 
         baseDir = os.path.dirname(os.path.abspath(__file__))
 
-        btn_files = [
+        btnFiles = [
             os.path.join(baseDir, "images", "image1.png"),
             os.path.join(baseDir, "images", "image2.png"),
             os.path.join(baseDir, "images", "image3.png"),
             os.path.join(baseDir, "images", "image4.png"),
             os.path.join(baseDir, "images", "image5.png")
         ]
-        new_image_list = []
-        for i, file in enumerate(btn_files):
+        newImageList = []
+        for i, filePath in enumerate(btnFiles):
             try:
-                pil_img = Image.open(file)
+                pilImg = Image.open(filePath)
             except Exception as e:
-                print(f"Error al abrir {file}: {e}")
-                pil_img = Image.new("RGB", (200, 150), "white")
-            orig_size = pil_img.size
-            new_size = (max(1, int(orig_size[0] * scale)), max(1, int(orig_size[1] * scale)))
-            resized = pil_img.resize(new_size, Image.LANCZOS)
-            new_image_list.append(ImageTk.PhotoImage(resized))
-        self.imageList = new_image_list
+                print(f"Error al abrir {filePath}: {e}")
+                pilImg = Image.new("RGB", (200, 150), "white")
+            origSize = pilImg.size
+            newSize = (max(1, int(origSize[0] * scale)), max(1, int(origSize[1] * scale)))
+            resized = pilImg.resize(newSize, Image.LANCZOS)
+            newImageList.append(ImageTk.PhotoImage(resized))
+        self.imageList = newImageList
         self.enterButton.config(image=self.imageList[self.currentImageIndex])
         self.enterButton.image = self.imageList[self.currentImageIndex]
 
-        dev_index = self.currentResumeIndex
-        dev_files = [os.path.join(baseDir, "images", f"dev{dev_index + 1}_{i}.png") for i in range(1, 5)]
-        new_dev_images = []
-        for i, file in enumerate(dev_files):
+        devIndex = self.currentResumeIndex
+        devFiles = [os.path.join(baseDir, "images", f"dev{devIndex + 1}_{i}.png") for i in range(1, 5)]
+        newDevImages = []
+        for i, devFile in enumerate(devFiles):
             try:
-                pil_img = Image.open(file)
+                pilImg = Image.open(devFile)
             except Exception as e:
-                print(f"Error al abrir {file}: {e}")
-                pil_img = Image.new("RGB", (100, 100), "white")
-            orig_size = pil_img.size
-            new_size = (max(1, int(orig_size[0] * scale)), max(1, int(orig_size[1] * scale)))
-            resized = pil_img.resize(new_size, Image.LANCZOS)
-            new_dev_images.append(ImageTk.PhotoImage(resized))
-        self.devImages = new_dev_images
+                print(f"Error al abrir {devFile}: {e}")
+                pilImg = Image.new("RGB", (100, 100), "white")
+            origSize = pilImg.size
+            newSize = (max(1, int(origSize[0] * scale)), max(1, int(origSize[1] * scale)))
+            resized = pilImg.resize(newSize, Image.LANCZOS)
+            newDevImages.append(ImageTk.PhotoImage(resized))
+        self.devImages = newDevImages
         self.photoLabel1.config(image=self.devImages[0])
         self.photoLabel1.image = self.devImages[0]
         self.photoLabel2.config(image=self.devImages[1])
