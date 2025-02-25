@@ -1776,7 +1776,7 @@ class Application(tk.Tk):
 
             if confirmacion:
                 reserva_seleccionada.pagada = True  # Marcar como pagada
-                self.actualizar_lista()  # Actualizar la lista para ocultar la reserva pagada
+                #BUGG self.actualizar_lista()  # Actualizar la lista para ocultar la reserva pagada
 
 #PAGAR FORMATIVO
 
@@ -1795,7 +1795,7 @@ class Application(tk.Tk):
         self.jovenes_no_pagados = [joven for joven in Joven.listaJovenes if not joven.inscripcionPagada]
 
         for joven in self.jovenes_no_pagados:
-            self.listbox.insert(tk.END, str(joven) + f"- Pagado: {"Si" if joven.inscripcionPagada else "No"}")
+            self.listbox.insert(tk.END, str(joven) + f"- Pagado: {'Si' if joven.inscripcionPagada else 'No'}")
 
         self.btnPagar = tk.Button(self.winPagarFormativo, text="Pagar Joven", command=self.pagarJoven)
         self.btnPagar.pack(pady=10)
