@@ -1,15 +1,18 @@
+DATOS PERSONALES: 
+Nombre: Jose Mauricio Toscano Aguas 
+Teléfono: 3004364437
+Correo: jtoscanoa@unal.edu.co
+Carrera: Ingeniería de sistemas e informática 
 
-m
-m
-m
-m
-m
-mM
-M
-M
-M
-M
-MM
-M
-MM
-M
+FORMACIÓN ACADÉMICA:
+Carrera: Ingeniería de Sistemas e Informática
+Institución: Universidad Nacional de Colombia (UNAL)
+Título: Bachiller
+Institución: Colegio de la Sagrada Familia sede Montería 
+PERFIL PROFESIONAL: Soy un joven dedicado a lo que me apasiona, con gran carisma, destreza a la hora de aprender nuevos temas,
+capacidades de trabajo bajo presión, e inagotables ganas de aprender cosas nuevas.
+
+OTROS:
+Cursé y aprobé 17 semestres de inglés en el centro de idiomas de la universidad de Córdoba, sede Montería.
+Transcriptor y traductor de documentos legales con énfasis en inmigración a los Estados Unidos de América.
+Inglés Nivel C2

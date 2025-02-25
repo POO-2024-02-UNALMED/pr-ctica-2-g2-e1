@@ -1,15 +1,19 @@
-J
-J
+DATOS PERSONALES:
+Nombre: Jesus Daniel Pérez Petro
+Teléfono: 3238107182
+Correo: jesperezpe@unal.edu.co
 
+FORMACIÓN ACADÉMICA:
+Carrera: Ciencias de la Computación
+Institución: Universidad Nacional de Colombia
+Título: Bachiller (Corriente)
+Colegio: Academia Militar Gustavo Rojas Pinilla
 
+PERFIL PROFESIONAL:
+Fascinado con la computación y aprender sus aplicaciones en diferentes áreas,
+dispuesto a adquirir nuevas herramientas y brindar colaboración.
+Programo desde 2020: comencé con el desarrollo de videojuegos en Unity y, en 2022,
+me pasé al desarrollo web y móvil.
 
-   J
-   J
-   J
-
-    J
-
-
-
-
-j
+OTROS:
+Cuento con un nivel sólido de inglés.
